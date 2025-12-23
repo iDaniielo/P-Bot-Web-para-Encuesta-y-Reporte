@@ -35,13 +35,13 @@ export default function SignupPage() {
     }
 
     try {
-      const { data, error: signUpError } = await supabaseBrowser.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (authError) {
-        setError(authError.message);
+      if (signUpError) {
+        setError(signUpError.message);
         return;
       }
 
