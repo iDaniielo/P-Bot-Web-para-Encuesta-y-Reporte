@@ -6,7 +6,7 @@ export interface SurveyQuestion {
   question: string;
   placeholder?: string;
   options?: string[];
-  validation: z.ZodType<any>;
+  validation: z.ZodType<string>;
 }
 
 // Zod validation schemas

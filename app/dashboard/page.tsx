@@ -23,6 +23,8 @@ export default function DashboardPage() {
       setEncuestas(data);
     } catch (error) {
       console.error('Error fetching surveys:', error);
+      // TODO: Implement proper error UI with error boundaries
+      // For production, show user-friendly error message
     } finally {
       setLoading(false);
     }

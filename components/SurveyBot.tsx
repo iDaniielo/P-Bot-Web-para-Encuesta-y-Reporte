@@ -52,7 +52,10 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
       setIsCompleted(true);
     } catch (error) {
       console.error('Error submitting survey:', error);
-      alert('Hubo un error al enviar la encuesta. Por favor intenta de nuevo.');
+      // TODO: Implement proper error handling with toast notifications
+      // For production, consider using a library like react-hot-toast or sonner
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Hubo un error al enviar la encuesta: ${errorMessage}. Por favor intenta de nuevo.`);
     } finally {
       setIsSubmitting(false);
     }

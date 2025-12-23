@@ -21,8 +21,15 @@ CREATE POLICY "Allow public inserts" ON public.encuestas
     WITH CHECK (true);
 
 -- Create policy to allow authenticated reads (for dashboard)
--- Note: For production, you should implement proper authentication
--- For now, we'll allow public reads for the dashboard
+-- ⚠️ SECURITY NOTE: This policy allows public reads for demonstration purposes.
+-- For production, you should:
+-- 1. Implement proper authentication (Supabase Auth, NextAuth.js, etc.)
+-- 2. Restrict reads to authenticated users only
+-- 3. Consider adding user roles and permissions
+-- Example for authenticated-only reads:
+-- CREATE POLICY "Allow authenticated reads" ON public.encuestas
+--     FOR SELECT
+--     USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow public reads" ON public.encuestas
     FOR SELECT
     USING (true);

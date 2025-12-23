@@ -21,8 +21,9 @@ export default function EncuestaPage() {
       ]);
 
     if (error) {
+      // TODO: Implement proper error tracking (e.g., Sentry, LogRocket)
       console.error('Error inserting survey:', error);
-      throw error;
+      throw new Error(`Error al guardar la encuesta: ${error.message}`);
     }
   };
 
