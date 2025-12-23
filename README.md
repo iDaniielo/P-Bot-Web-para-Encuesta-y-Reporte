@@ -2,6 +2,16 @@
 
 Una aplicación web moderna construida con Next.js 14, TypeScript y Supabase para recolectar y visualizar datos de encuestas navideñas.
 
+## 📚 Documentación
+
+- 🚀 **[Quick Start](QUICK_START.md)** - ¡Empieza en 5 minutos!
+- 📖 **[Setup Guide](SETUP_GUIDE.md)** - Guía detallada de configuración
+- 🏗️ **[Architecture](ARCHITECTURE.md)** - Diagrama y explicación de la arquitectura
+- 📁 **[Project Structure](PROJECT_STRUCTURE.md)** - Estructura de carpetas y archivos
+- 🐳 **[Docker Guide](DOCKER_GUIDE.md)** - Guía completa de Docker
+- ☁️ **[Vercel Deployment](VERCEL_DEPLOYMENT.md)** - Despliegue en producción
+- 📦 **[Deliverables](DELIVERABLES.md)** - Resumen de entregables
+
 ## 🚀 Stack Tecnológico
 
 - **Frontend:** Next.js 14+ (App Router), TypeScript, Tailwind CSS
