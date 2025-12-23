@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { SurveyResponse } from '@/lib/types';
 import Link from 'next/link';
 
@@ -25,7 +25,8 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
+      const client = getSupabaseClient();
+      const { data, error: fetchError } = await client
         .from('survey_responses')
         .select('*')
         .order('created_at', { ascending: false });

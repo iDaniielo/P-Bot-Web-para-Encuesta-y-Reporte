@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import StepForm from '@/components/StepForm';
 import { surveyFields } from '@/lib/surveyConfig';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { SurveyResponse } from '@/lib/types';
 import Link from 'next/link';
 
@@ -13,7 +13,8 @@ export default function EncuestaPage() {
   const router = useRouter();
 
   const handleSubmit = async (data: Omit<SurveyResponse, 'id' | 'created_at'>) => {
-    const { error } = await supabase
+    const client = getSupabaseClient();
+    const { error } = await client
       .from('survey_responses')
       .insert([data]);
 
