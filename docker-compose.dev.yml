@@ -1,30 +1,9 @@
-version: '3.8'
-
+# Development-optimized Docker Compose
+# This version skips the build step and runs directly with node_modules volume
 services:
-  navidad-survey:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: navidad-survey-app
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}
-    restart: unless-stopped
-    networks:
-      - navidad-network
-
-networks:
-  navidad-network:
-services:
-  # Next.js Application
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: node:20-alpine
+    working_dir: /app
     ports:
       - "3000:3000"
     environment:
@@ -35,12 +14,11 @@ services:
       - .:/app
       - /app/node_modules
       - /app/.next
-    command: npm run dev
+    command: sh -c "npm install && npm run dev"
     restart: unless-stopped
     networks:
       - app-network
 
-  # PostgreSQL Database (optional, for local development without Supabase)
   postgres:
     image: postgres:16-alpine
     ports:
