@@ -53,16 +53,22 @@ WITH CHECK (
 -- POLICY 2: Admin-Only Reads (CEO Dashboard)
 -- ----------------------------------------------------------------------------
 -- Restricts SELECT to authenticated users only
--- For production, you should implement proper role-based access control
+-- IMPORTANT: This basic policy grants read access to ALL authenticated users.
+-- This is INTENTIONAL for demonstration/initial setup, allowing any authenticated
+-- user to access the dashboard. For production, you MUST implement role-based
+-- access control using the enhanced version below.
 CREATE POLICY "Only authenticated users can read all responses"
 ON public.encuestas
 FOR SELECT
 TO authenticated
 USING (
-  -- Only authenticated users can read records
-  -- In production, add additional role checks:
-  -- auth.jwt()->>'role' = 'admin' OR auth.jwt()->>'email' = 'ceo@company.com'
+  -- Basic: Any authenticated user can read
+  -- This allows testing with any Supabase authenticated account
   true
+  
+  -- For PRODUCTION, replace 'true' with role-based check:
+  -- (auth.jwt()->>'role')::text = 'admin'
+  -- OR auth.jwt()->>'email' = 'ceo@company.com'
 );
 
 -- ============================================================================

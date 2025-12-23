@@ -22,6 +22,8 @@ const nextConfig = {
           {
             // Content Security Policy - XSS Protection
             // Allows: same origin, inline scripts (for Next.js), and specific trusted domains
+            // NOTE: 'unsafe-eval' is required for Next.js dev mode and some runtime features
+            // For maximum security in production, consider implementing nonces or hashes
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
@@ -51,9 +53,9 @@ const nextConfig = {
             value: '1; mode=block',
           },
           {
-            // Prevent DNS prefetching
+            // Disable DNS prefetching for better privacy
             key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            value: 'off',
           },
           {
             // Strict Transport Security - Force HTTPS (only in production)
