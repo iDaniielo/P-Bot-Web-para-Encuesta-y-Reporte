@@ -36,19 +36,6 @@ export default function DashboardPage() {
   const itemsPerPage = 10;
   const { user, isAuthenticated, logout } = useAuth();
 
-  useEffect(() => {
-    if (!isAuthenticated && !loading) {
-      // El middleware redirigirá automáticamente a /login si no hay token
-      return;
-    }
-    fetchEncuestas();
-  }, [isAuthenticated, loading, fetchEncuestas]);
-
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    await logout();
-  };
-
   const fetchEncuestas = async () => {
     try {
       const response = await fetch('/api/encuestas');
@@ -67,6 +54,20 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      // El middleware redirigirá automáticamente a /login si no hay token
+      return;
+    }
+    fetchEncuestas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, loading]);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await logout();
   };
 
   // Calculate KPIs
