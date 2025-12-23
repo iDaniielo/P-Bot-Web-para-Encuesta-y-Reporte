@@ -186,7 +186,7 @@ export const exportToExcel = (encuestas: Encuesta[], fileName: string = 'reporte
     .sort((a, b) => b[1] - a[1])
     .forEach(([gift, count]) => {
       const percentage = ((count / totalEncuestas) * 100).toFixed(2);
-      giftAnalysis.push([gift, count, `${percentage}%`]);
+      giftAnalysis.push([gift, count.toString(), `${percentage}%`]);
     });
 
   const wsGiftAnalysis = XLSX.utils.aoa_to_sheet(giftAnalysis);
@@ -204,7 +204,7 @@ export const exportToExcel = (encuestas: Encuesta[], fileName: string = 'reporte
     .sort((a, b) => b[1] - a[1])
     .forEach(([place, count]) => {
       const percentage = ((count / totalEncuestas) * 100).toFixed(2);
-      placeAnalysis.push([place, count, `${percentage}%`]);
+      placeAnalysis.push([place, count.toString(), `${percentage}%`]);
     });
 
   const wsPlaceAnalysis = XLSX.utils.aoa_to_sheet(placeAnalysis);
