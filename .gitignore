@@ -1,37 +1,182 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# ===========================
+# Dependencies
+# ===========================
 /node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
+yarn.lock
+package-lock.json.bak
 
-# testing
+# ===========================
+# Testing
+# ===========================
 /coverage
+*.coverage
+.nyc_output
+.jest-cache
 
-# next.js
+# ===========================
+# Next.js
+# ===========================
 /.next/
 /out/
+.next
+next-env.d.ts
+.swc/
 
-# production
+# ===========================
+# Production & Build
+# ===========================
 /build
+/dist
+*.tsbuildinfo
+build-stats.json
 
-# misc
-.DS_Store
-*.pem
+# ===========================
+# Environment Variables (CRITICAL)
+# ===========================
+# Local environment files
+.env
+.env*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# debug
+# NEVER commit these files
+.env.production
+.env.development
+.env.test
+
+# Keep only example files
+!.env.example
+!.env.sample
+
+# ===========================
+# Vercel
+# ===========================
+.vercel
+.vercel.json
+
+# ===========================
+# Supabase
+# ===========================
+# Supabase local development
+.supabase
+supabase/.temp
+supabase/functions/.temp
+
+# Supabase generated types (if auto-generated)
+# types/supabase-generated.ts
+
+# ===========================
+# Logs
+# ===========================
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# local env files
-.env*.local
-.env
+# ===========================
+# OS & System Files
+# ===========================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
 
-# vercel
-.vercel
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Linux
+*~
+.directory
+.Trash-*
+
+# ===========================
+# IDE & Editors
+# ===========================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+
+# ===========================
+# Docker
+# ===========================
+docker-compose.override.yml
+.dockerignore.bak
+*.dockerfile.bak
+
+# ===========================
+# Certificates & Keys
+# ===========================
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# ===========================
+# Temporary Files
+# ===========================
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~.nib
+*.cache
+.temp/
+
+# ===========================
+# Misc
+# ===========================
+.turbo
+.cache
+.parcel-cache
+.eslintcache
+.stylelintcache
