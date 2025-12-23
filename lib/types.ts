@@ -1,15 +1,11 @@
 export interface SurveyResponse {
   id?: number;
-  nombre: string;
-  telefono: string;
-  regalo: string;
-  lugar: string;
-  gasto: number;
   created_at?: string;
+  [key: string]: any; // Permitir campos dinámicos
 }
 
 export interface FormField {
-  name: keyof Omit<SurveyResponse, 'id' | 'created_at'>;
+  name: string;
   label: string;
   type: 'text' | 'tel' | 'number' | 'select';
   placeholder?: string;

@@ -47,8 +47,8 @@ export default function StepForm({ fields: providedFields, onSubmit, onSuccess }
         const convertedFields: FormField[] = questions.map((q) => ({
           name: q.question_key,
           label: q.question_text,
-          type: q.question_type === 'phone' ? 'text' : q.question_type === 'checkbox' || q.question_type === 'radio' || q.question_type === 'select' ? 'select' : q.question_type,
-          required: q.validation_rules?.required || true,
+          type: q.question_type === 'phone' ? 'tel' : q.question_type === 'checkbox' || q.question_type === 'radio' || q.question_type === 'select' ? 'select' : (q.question_type as 'text' | 'tel' | 'number' | 'select'),
+          required: q.validation_rules?.required !== false,
           options: q.options,
           placeholder: getPlaceholder(q.question_type, q.question_key),
         }));
