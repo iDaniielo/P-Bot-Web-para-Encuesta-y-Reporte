@@ -59,6 +59,17 @@ export default function StepForm({ fields, onSubmit, onSuccess }: StepFormProps)
       setIsSubmitting(true);
       setError(null);
       
+      // Validate all required fields are present
+      const isValid = fields.every(field => {
+        if (!field.required) return true;
+        const value = formData[field.name];
+        return value !== undefined && value !== '' && value !== null;
+      });
+
+      if (!isValid) {
+        throw new Error('Por favor completa todos los campos requeridos');
+      }
+
       await onSubmit(formData as Omit<SurveyResponse, 'id' | 'created_at'>);
       
       if (onSuccess) {

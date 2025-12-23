@@ -39,7 +39,11 @@ export default function DashboardPage() {
       // Calculate KPIs
       const totalResponses = responsesData.length;
       const averageExpense = totalResponses > 0
-        ? responsesData.reduce((sum, r) => sum + (r.gasto || 0), 0) / totalResponses
+        ? responsesData.reduce((sum, r) => {
+            // Ensure gasto is a valid number
+            const gasto = typeof r.gasto === 'number' ? r.gasto : 0;
+            return sum + gasto;
+          }, 0) / totalResponses
         : 0;
 
       setKpiData({

@@ -48,10 +48,7 @@ export default function EncuestaPage() {
               Volver al inicio
             </Link>
             <button
-              onClick={() => {
-                setIsComplete(false);
-                window.location.reload();
-              }}
+              onClick={() => setIsComplete(false)}
               className="block w-full px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-medium"
             >
               Enviar otra respuesta
