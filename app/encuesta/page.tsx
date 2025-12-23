@@ -1,6 +1,6 @@
 'use client';
 
-import { supabase } from '@/lib/supabase';
+import { supabaseBrowser } from '@/lib/supabase-browser';
 import SurveyBot from '@/components/SurveyBot';
 import type { SurveyFormData } from '@/lib/survey-config';
 import { ArrowLeft } from 'lucide-react';
@@ -9,18 +9,22 @@ import Link from 'next/link';
 export default function EncuestaPage() {
   const handleSurveyComplete = async (data: SurveyFormData) => {
     try {
-      const { data: result, error } = await supabase
+      // Preparar datos - solo campos que existen en la tabla encuestas
+      const surveyData: any = {
+        nombre: data.nombre || '',
+        telefono: data.telefono || '',
+        regalo: data.regalo || [],
+        regalo_otro: data.regalo_otro || null,
+        lugar_compra: data.lugar_compra || '',
+        gasto: data.gasto || '',
+        respuestas: data, // Guardar todas las respuestas en JSON
+      };
+
+      console.log('Sending survey data:', surveyData);
+
+      const { data: result, error } = await supabaseBrowser
         .from('encuestas')
-        .insert([
-          {
-            nombre: data.nombre,
-            telefono: data.telefono,
-            regalo: data.regalo,
-            regalo_otro: data.regalo_otro || null,
-            lugar_compra: data.lugar_compra,
-            gasto: data.gasto,
-          },
-        ])
+        .insert([surveyData])
         .select();
 
       if (error) {

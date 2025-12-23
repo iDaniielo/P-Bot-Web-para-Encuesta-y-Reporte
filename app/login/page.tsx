@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import { LogIn, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 
@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      const { data, error: authError } = await supabaseBrowser.auth.signInWithPassword({
         email,
         password,
       });
@@ -30,9 +30,9 @@ export default function LoginPage() {
       }
 
       if (data.session) {
-        // Guardar el token en una cookie
-        document.cookie = `sb-access-token=${data.session.access_token}; path=/; secure; samesite=lax`;
-        router.push('/dashboard');
+        // La sesión se guarda automáticamente en las cookies de Supabase
+        // Forzar un refresh para asegurar que las cookies se propaguen
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       setError('Error al iniciar sesión. Intenta de nuevo.');
@@ -79,7 +79,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@email.com"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-black"
                   required
                 />
               </div>
@@ -97,7 +97,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-black"
                   required
                 />
               </div>

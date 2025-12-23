@@ -8,6 +8,7 @@
 .pnp.js
 .yarn/install-state.gz
 yarn.lock
+package-lock.json
 package-lock.json.bak
 
 # ===========================
@@ -26,6 +27,58 @@ package-lock.json.bak
 .next
 next-env.d.ts
 .swc/
+
+# ===========================
+# Environment Variables
+# ===========================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===========================
+# Logs
+# ===========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ===========================
+# OS Files
+# ===========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.directory
+
+# ===========================
+# IDE / Editor
+# ===========================
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# ===========================
+# Temporary / Build Files
+# ===========================
+*.tsbuildinfo
+.cache/
+dist/
+build/
+
+# ===========================
+# Database Scripts (temporales)
+# ===========================
+fix-*.sql
+verify-*.sql
+temp-*.sql
 
 # ===========================
 # Production & Build

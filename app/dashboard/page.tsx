@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { TrendingUp, ShoppingBag, Users, ArrowLeft, Loader2, Gift, DollarSign, LogOut, Download } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Users, ArrowLeft, Loader2, Gift, DollarSign, LogOut, Download, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import type { Encuesta } from '@/types/database';
 import { exportToExcel } from '@/lib/excel-export';
+import QuestionManager from '@/components/QuestionManager';
 
 // Helper function to mask phone numbers (e.g., 5551234567 -> 55****4567)
 const maskPhone = (phone: string): string => {
@@ -34,6 +35,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'questions'>('dashboard');
   const itemsPerPage = 10;
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -119,7 +121,18 @@ export default function DashboardPage() {
 
   // Top 3 Shopping Places by frequency
   const placeCounts = encuestas.reduce((acc, curr) => {
-    acc[curr.lugar_compra] = (acc[curr.lugar_compra] || 0) + 1;
+    // Intentar obtener lugar_compra de la columna o de respuestas
+    let lugar = curr.lugar_compra;
+    if (!lugar || lugar === 'EMPTY') {
+      if (curr.respuestas && typeof curr.respuestas === 'object') {
+        const resp = curr.respuestas as any;
+        lugar = resp.lugar_compra || resp.lugar || '';
+      }
+    }
+    
+    if (lugar && lugar !== 'EMPTY') {
+      acc[lugar] = (acc[lugar] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
@@ -129,13 +142,32 @@ export default function DashboardPage() {
 
   // Average Spending
   const totalSpending = encuestas.reduce((sum, curr) => {
-    return sum + getAverageFromRange(curr.gasto);
+    // Intentar obtener gasto de la columna o de respuestas
+    let gasto = curr.gasto;
+    if (!gasto) {
+      if (curr.respuestas && typeof curr.respuestas === 'object') {
+        const resp = curr.respuestas as any;
+        gasto = resp.gasto || '';
+      }
+    }
+    return sum + (gasto ? getAverageFromRange(gasto) : 0);
   }, 0);
   const avgSpending = totalEncuestas > 0 ? totalSpending / totalEncuestas : 0;
 
   // Prepare data for budget distribution chart
   const gastoDistribution = encuestas.reduce((acc, curr) => {
-    acc[curr.gasto] = (acc[curr.gasto] || 0) + 1;
+    // Intentar obtener gasto de la columna o de respuestas
+    let gasto = curr.gasto;
+    if (!gasto) {
+      if (curr.respuestas && typeof curr.respuestas === 'object') {
+        const resp = curr.respuestas as any;
+        gasto = resp.gasto || '';
+      }
+    }
+    
+    if (gasto) {
+      acc[gasto] = (acc[gasto] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
@@ -220,8 +252,38 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* KPI Cards Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Tabs Navigation */}
+        <div className="mb-6 border-b border-gray-200">
+          <nav className="-mb-px flex gap-6">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'dashboard'
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              📊 Dashboard
+            </button>
+            <button
+              onClick={() => setActiveTab('questions')}
+              className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+                activeTab === 'questions'
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              Gestión de Preguntas
+            </button>
+          </nav>
+        </div>
+
+        {/* Content based on active tab */}
+        {activeTab === 'dashboard' ? (
+          <>
+            {/* KPI Cards Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Total Responses */}
           <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-600">
             <div className="flex items-center justify-between">
@@ -435,8 +497,34 @@ export default function DashboardPage() {
                             return displayRegalos.join(', ');
                           })()}
                         </td>
-                        <td className="p-3 text-sm text-gray-600">{encuesta.lugar_compra}</td>
-                        <td className="p-3 text-sm text-gray-600">{encuesta.gasto}</td>
+                        <td className="p-3 text-sm text-gray-600">
+                          {(() => {
+                            // Intentar obtener lugar_compra de la columna o de respuestas
+                            let lugar = encuesta.lugar_compra;
+                            if (!lugar || lugar === 'EMPTY') {
+                              // Buscar en el campo respuestas
+                              if (encuesta.respuestas && typeof encuesta.respuestas === 'object') {
+                                const resp = encuesta.respuestas as any;
+                                lugar = resp.lugar_compra || resp.lugar || '';
+                              }
+                            }
+                            return lugar || 'N/A';
+                          })()}
+                        </td>
+                        <td className="p-3 text-sm text-gray-600">
+                          {(() => {
+                            // Intentar obtener gasto de la columna o de respuestas
+                            let gasto = encuesta.gasto;
+                            if (!gasto) {
+                              // Buscar en el campo respuestas
+                              if (encuesta.respuestas && typeof encuesta.respuestas === 'object') {
+                                const resp = encuesta.respuestas as any;
+                                gasto = resp.gasto || '';
+                              }
+                            }
+                            return gasto || 'N/A';
+                          })()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -472,6 +560,10 @@ export default function DashboardPage() {
             </p>
           )}
         </div>
+          </>
+        ) : (
+          <QuestionManager />
+        )}
       </div>
     </main>
   );

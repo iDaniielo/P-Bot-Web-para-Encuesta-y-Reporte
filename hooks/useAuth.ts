@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabaseBrowser } from '@/lib/supabase-browser';
 
 export function useAuth() {
   const [user, setUser] = useState<any>(null);
@@ -11,7 +11,7 @@ export function useAuth() {
     checkAuth();
     
     // Escuchar cambios de autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription } } = supabaseBrowser.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
@@ -25,7 +25,7 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabaseBrowser.auth.getSession();
       setUser(session?.user ?? null);
     } catch (error) {
       console.error('Error checking auth:', error);
@@ -36,7 +36,7 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      await supabaseBrowser.auth.signOut();
       setUser(null);
       router.push('/login');
     } catch (error) {

@@ -1,21 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
-import { surveyQuestions, surveySchema, type SurveyFormData } from '@/lib/survey-config';
+import { surveyQuestions, type SurveyFormData, type SurveyQuestion } from '@/lib/survey-config';
+import { z } from 'zod';
 import Link from 'next/link';
 
 interface SurveyBotProps {
   onComplete: (data: SurveyFormData) => Promise<void>;
 }
 
+// Helper para crear validación Zod basada en el tipo de pregunta
+function createValidation(question: SurveyQuestion): z.ZodType<any> {
+  switch (question.type) {
+    case 'tel':
+      return z.string().regex(/^\d{10}$/, 'El número debe tener exactamente 10 dígitos');
+    case 'text':
+      return z.string().min(2, `Debe tener al menos 2 caracteres`);
+    case 'checkbox':
+      return z.array(z.string()).min(1, 'Selecciona al menos una opción');
+    case 'radio':
+    case 'select':
+      return z.string().min(1, 'Selecciona una opción');
+    default:
+      return z.string().min(1, 'Este campo es obligatorio');
+  }
+}
+
 export default function SurveyBot({ onComplete }: SurveyBotProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [questions, setQuestions] = useState<SurveyQuestion[]>(surveyQuestions); // Iniciar con preguntas por defecto
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Cargar preguntas desde la API
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch('/api/questions');
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.questions && data.questions.length > 0) {
+            setQuestions(data.questions);
+          }
+        }
+      } catch (error) {
+        // Mantener las preguntas por defecto si hay error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
 
   const {
     register,
@@ -23,20 +65,48 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
     formState: { errors },
     trigger,
     getValues,
-  } = useForm<SurveyFormData>({
-    resolver: zodResolver(surveySchema),
+    setError,
+    clearErrors,
+  } = useForm<any>({
     mode: 'onChange',
   });
 
-  const currentQuestion = surveyQuestions[currentStep];
-  const progress = ((currentStep + 1) / surveyQuestions.length) * 100;
+  const currentQuestion = questions[currentStep];
+  const progress = ((currentStep + 1) / questions.length) * 100;
+
+  // Mostrar loading mientras se cargan las preguntas
+  if (isLoading || questions.length === 0) {
+    return (
+      <div className="w-full max-w-2xl mx-auto text-center py-12">
+        <Loader2 className="w-12 h-12 animate-spin text-red-600 mx-auto mb-4" />
+        <p className="text-gray-600">Cargando preguntas...</p>
+      </div>
+    );
+  }
 
   const handleNext = async () => {
     const fieldName = currentQuestion.id as keyof SurveyFormData;
-    const isValid = await trigger(fieldName);
-
-    if (isValid && currentStep < surveyQuestions.length - 1) {
-      setCurrentStep(currentStep + 1);
+    const fieldValue = getValues(fieldName as any);
+    
+    // Crear validación dinámica basada en el tipo de pregunta
+    const validation = createValidation(currentQuestion);
+    
+    // Validación manual
+    try {
+      await validation.parseAsync(fieldValue);
+      // Si la validación pasa, limpiar errores y avanzar
+      clearErrors(fieldName);
+      if (currentStep < questions.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } catch (error: any) {
+      // Mostrar el error de validación
+      if (error.errors && error.errors[0]) {
+        setError(fieldName, {
+          type: 'manual',
+          message: error.errors[0].message,
+        });
+      }
     }
   };
 
@@ -46,17 +116,30 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
     }
   };
 
-  const onSubmit = async (data: SurveyFormData) => {
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
+      // Validar todos los campos antes de enviar
+      let allValid = true;
+      for (const question of questions) {
+        try {
+          const validation = createValidation(question);
+          await validation.parseAsync(data[question.id]);
+        } catch (error) {
+          allValid = false;
+          break;
+        }
+      }
+
+      if (!allValid) {
+        setIsSubmitting(false);
+        return;
+      }
+
       await onComplete(data);
       setIsCompleted(true);
     } catch (error) {
-      console.error('Error submitting survey:', error);
-      // TODO: Implement proper error handling with toast notifications
-      // For production, consider using a library like react-hot-toast or sonner
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert(`Hubo un error al enviar la encuesta: ${errorMessage}. Por favor intenta de nuevo.`);
+      // Error al enviar la encuesta
     } finally {
       setIsSubmitting(false);
     }
@@ -98,7 +181,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
               autoFocus
             />
             {error && (
-              <p className="mt-2 text-red-600 text-sm">{error.message}</p>
+              <p className="mt-2 text-red-600 text-sm">{error.message?.toString()}</p>
             )}
           </div>
         );
@@ -119,7 +202,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
               ))}
             </select>
             {error && (
-              <p className="mt-2 text-red-600 text-sm">{error.message}</p>
+              <p className="mt-2 text-red-600 text-sm">{error.message?.toString()}</p>
             )}
           </div>
         );
@@ -142,7 +225,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
               </label>
             ))}
             {error && (
-              <p className="mt-2 text-red-600 text-sm">{error.message}</p>
+              <p className="mt-2 text-red-600 text-sm">{error.message?.toString()}</p>
             )}
           </div>
         );
@@ -186,7 +269,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
             )}
             
             {error && (
-              <p className="mt-2 text-red-600 text-sm">{error.message}</p>
+              <p className="mt-2 text-red-600 text-sm">{error.message?.toString()}</p>
             )}
           </div>
         );
@@ -198,7 +281,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex justify-between text-sm text-gray-800 font-medium mb-2">
-          <span>Pregunta {currentStep + 1} de {surveyQuestions.length}</span>
+          <span>Pregunta {currentStep + 1} de {questions.length}</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -241,7 +324,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
             </button>
           )}
 
-          {currentStep < surveyQuestions.length - 1 ? (
+          {currentStep < questions.length - 1 ? (
             <button
               type="button"
               onClick={handleNext}
