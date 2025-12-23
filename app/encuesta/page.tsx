@@ -8,21 +8,34 @@ import Link from 'next/link';
 
 export default function EncuestaPage() {
   const handleSurveyComplete = async (data: SurveyFormData) => {
-    const { error } = await supabase
-      .from('encuestas')
-      .insert([
-        {
-          nombre: data.nombre,
-          telefono: data.telefono,
-          regalo: data.regalo,
-          lugar_compra: data.lugar_compra,
-          gasto: data.gasto,
-        },
-      ]);
+    try {
+      const { data: result, error } = await supabase
+        .from('encuestas')
+        .insert([
+          {
+            nombre: data.nombre,
+            telefono: data.telefono,
+            regalo: data.regalo,
+            lugar_compra: data.lugar_compra,
+            gasto: data.gasto,
+          },
+        ])
+        .select();
 
-    if (error) {
-      console.error('Error inserting survey:', error);
-      throw new Error(`Error al guardar la encuesta: ${error.message}`);
+      if (error) {
+        console.error('Error inserting survey:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        throw new Error(
+          error.message || 
+          error.details || 
+          'Error desconocido al guardar la encuesta. Verifica la configuración de Supabase.'
+        );
+      }
+
+      console.log('Survey saved successfully:', result);
+    } catch (err) {
+      console.error('Caught error:', err);
+      throw err;
     }
   };
 

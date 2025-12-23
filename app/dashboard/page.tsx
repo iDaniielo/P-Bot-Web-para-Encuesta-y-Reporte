@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { TrendingUp, ShoppingBag, Users, ArrowLeft, Loader2, Gift, DollarSign } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Users, ArrowLeft, Loader2, Gift, DollarSign, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 import type { Encuesta } from '@/types/database';
 
 // Helper function to mask phone numbers (e.g., 5551234567 -> 55****4567)
@@ -31,11 +32,22 @@ export default function DashboardPage() {
   const [encuestas, setEncuestas] = useState<Encuesta[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loggingOut, setLoggingOut] = useState(false);
   const itemsPerPage = 10;
+  const { user, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      // El middleware redirigirá automáticamente a /login si no hay token
+      return;
+    }
     fetchEncuestas();
-  }, []);
+  }, [isAuthenticated]);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await logout();
+  };
 
   const fetchEncuestas = async () => {
     try {
@@ -124,19 +136,43 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Volver al inicio
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Volver al inicio
+            </Link>
+            <button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loggingOut ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Cerrando sesión...
+                </>
+              ) : (
+                <>
+                  <LogOut className="w-4 h-4" />
+                  Cerrar Sesión
+                </>
+              )}
+            </button>
+          </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             📊 Dashboard CEO
           </h1>
           <p className="text-gray-600">
             Métricas y análisis de respuestas de la encuesta navideña
           </p>
+          {user && (
+            <p className="text-sm text-gray-500 mt-2">
+              Conectado como: <span className="font-medium">{user.email}</span>
+            </p>
+          )}
         </div>
 
         {/* KPI Cards Grid */}

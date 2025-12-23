@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export interface Database {
-  public: {
+  api: {
     Tables: {
       encuestas: {
         Row: {
@@ -55,4 +55,4 @@ export interface Database {
   };
 }
 
-export type Encuesta = Database['public']['Tables']['encuestas']['Row'];
+export type Encuesta = Database['api']['Tables']['encuestas']['Row'];

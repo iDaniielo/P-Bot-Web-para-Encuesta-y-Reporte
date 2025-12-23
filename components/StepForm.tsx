@@ -82,9 +82,21 @@ export default function StepForm({ fields, onSubmit, onSuccess }: StepFormProps)
   };
 
   const handleChange = (value: string | number) => {
+    let finalValue = value;
+    
+    // Si es el campo de teléfono, solo permitir números y máximo 10 dígitos
+    if (currentField.name === 'telefono' && typeof value === 'string') {
+      // Eliminar todo lo que no sea número
+      finalValue = value.replace(/\D/g, '');
+      // Limitar a 10 dígitos
+      if (finalValue.length > 10) {
+        finalValue = finalValue.slice(0, 10);
+      }
+    }
+    
     setFormData({
       ...formData,
-      [currentField.name]: currentField.type === 'number' ? Number(value) : value,
+      [currentField.name]: currentField.type === 'number' ? Number(finalValue) : finalValue,
     });
     setError(null);
   };

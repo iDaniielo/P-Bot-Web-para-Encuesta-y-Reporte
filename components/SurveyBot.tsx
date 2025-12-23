@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
-import Link from 'next/link';
 import { surveyQuestions, surveySchema, type SurveyFormData } from '@/lib/survey-config';
 
 interface SurveyBotProps {
@@ -73,15 +72,15 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
           ¡Gracias por participar!
         </h2>
-        <p className="text-gray-600 mb-8">
+        <p className="text-gray-800 text-lg mb-8">
           Tu respuesta ha sido registrada exitosamente.
         </p>
-        <Link
+        <a
           href="/"
           className="inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors"
         >
           Volver al Inicio
-        </Link>
+        </a>
       </motion.div>
     );
   }
@@ -99,7 +98,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
               {...register(fieldName)}
               type={currentQuestion.type}
               placeholder={currentQuestion.placeholder}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
               autoFocus
             />
             {error && (
@@ -113,7 +112,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
           <div>
             <select
               {...register(fieldName)}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
               autoFocus
             >
               <option value="">Selecciona una opción</option>
@@ -135,7 +134,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
             {currentQuestion.options?.map((option) => (
               <label
                 key={option}
-                className="flex items-center p-4 border-2 border-gray-300 rounded-lg hover:border-red-500 cursor-pointer transition-colors"
+                className="flex items-center p-4 border-2 border-gray-300 rounded-lg hover:border-red-500 cursor-pointer transition-colors bg-white"
               >
                 <input
                   {...register(fieldName)}
@@ -143,7 +142,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
                   value={option}
                   className="w-5 h-5 text-red-600 focus:ring-red-500"
                 />
-                <span className="ml-3 text-lg">{option}</span>
+                <span className="ml-3 text-lg font-medium text-gray-900">{option}</span>
               </label>
             ))}
             {error && (
@@ -158,7 +157,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
     <div className="w-full max-w-2xl mx-auto">
       {/* Progress Bar */}
       <div className="mb-8">
-        <div className="flex justify-between text-sm text-gray-600 mb-2">
+        <div className="flex justify-between text-sm text-gray-800 font-medium mb-2">
           <span>Pregunta {currentStep + 1} de {surveyQuestions.length}</span>
           <span>{Math.round(progress)}%</span>
         </div>
@@ -195,7 +194,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
             <button
               type="button"
               onClick={handlePrevious}
-              className="flex items-center gap-2 px-6 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+              className="flex items-center gap-2 px-6 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-400 transition-colors text-gray-900 font-medium"
             >
               <ArrowLeft className="w-5 h-5" />
               Anterior
