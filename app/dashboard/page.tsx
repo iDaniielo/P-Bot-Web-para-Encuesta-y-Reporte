@@ -41,9 +41,17 @@ export default function DashboardPage() {
     try {
       const response = await fetch('/api/encuestas');
       const data = await response.json();
-      setEncuestas(data || []);
+      
+      // Handle error response or invalid data
+      if (!response.ok || !Array.isArray(data)) {
+        setEncuestas([]);
+        return;
+      }
+      
+      setEncuestas(data);
     } catch (error) {
       console.error('Error fetching surveys:', error);
+      setEncuestas([]);
     } finally {
       setLoading(false);
     }
