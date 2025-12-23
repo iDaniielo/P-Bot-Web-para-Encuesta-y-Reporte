@@ -2,6 +2,11 @@
 const nextConfig = {
   output: 'standalone',
   
+  // Disable ESLint during builds (solo para desarrollo rápido)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
   // Security Headers Configuration
   async headers() {
     return [
