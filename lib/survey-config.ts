@@ -1,0 +1,73 @@
+import { z } from 'zod';
+
+export interface SurveyQuestion {
+  id: string;
+  type: 'text' | 'tel' | 'select' | 'radio';
+  question: string;
+  placeholder?: string;
+  options?: string[];
+  validation: z.ZodType<any>;
+}
+
+// Zod validation schemas
+export const surveySchema = z.object({
+  nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  telefono: z.string().min(8, 'Ingresa un teléfono válido'),
+  regalo: z.string().min(1, 'Este campo es requerido'),
+  lugar_compra: z.string().min(1, 'Selecciona una opción'),
+  gasto: z.string().min(1, 'Selecciona un rango'),
+});
+
+export type SurveyFormData = z.infer<typeof surveySchema>;
+
+// Survey questions configuration - 100% reusable and dynamic
+export const surveyQuestions: SurveyQuestion[] = [
+  {
+    id: 'nombre',
+    type: 'text',
+    question: '¿Cuál es tu nombre?',
+    placeholder: 'Ej: Juan Pérez',
+    validation: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  },
+  {
+    id: 'telefono',
+    type: 'tel',
+    question: '¿Cuál es tu número de teléfono?',
+    placeholder: 'Ej: 555-1234',
+    validation: z.string().min(8, 'Ingresa un teléfono válido'),
+  },
+  {
+    id: 'regalo',
+    type: 'text',
+    question: '¿Qué vas a regalar esta Navidad?',
+    placeholder: 'Ej: Juguetes, ropa, electrónicos...',
+    validation: z.string().min(1, 'Este campo es requerido'),
+  },
+  {
+    id: 'lugar_compra',
+    type: 'select',
+    question: '¿Dónde comprarás los regalos?',
+    options: [
+      'Tienda Online (Amazon, MercadoLibre, etc.)',
+      'Centro Comercial',
+      'Tienda Local',
+      'Supermercado',
+      'Tienda Departamental',
+      'Otro',
+    ],
+    validation: z.string().min(1, 'Selecciona una opción'),
+  },
+  {
+    id: 'gasto',
+    type: 'radio',
+    question: '¿Cuánto planeas gastar en total?',
+    options: [
+      'Menos de $50',
+      '$50-$100',
+      '$100-$200',
+      '$200-$500',
+      'Más de $500',
+    ],
+    validation: z.string().min(1, 'Selecciona un rango'),
+  },
+];
