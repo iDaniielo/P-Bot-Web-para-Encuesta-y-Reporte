@@ -379,7 +379,7 @@ docker-compose up -d
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | ✅ Controla información de referrer |
 | `Permissions-Policy` | `camera=(), microphone=()...` | ✅ Deshabilita APIs innecesarias |
 | `X-XSS-Protection` | `1; mode=block` | ✅ Filtro XSS para navegadores legacy |
-| `X-DNS-Prefetch-Control` | `on` | ✅ Control de DNS prefetching |
+| `X-DNS-Prefetch-Control` | `off` | ✅ Desactiva DNS prefetching (privacidad) |
 | `Strict-Transport-Security` | Comentado | ⚠️ Activar en producción con HTTPS |
 
 **Content Security Policy (CSP) configurado:**
