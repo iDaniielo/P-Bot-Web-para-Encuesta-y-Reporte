@@ -21,9 +21,12 @@ const nextConfig = {
           },
           {
             // Content Security Policy - XSS Protection
-            // Allows: same origin, inline scripts (for Next.js), and specific trusted domains
-            // NOTE: 'unsafe-eval' is required for Next.js dev mode and some runtime features
-            // For maximum security in production, consider implementing nonces or hashes
+            // NOTE: 'unsafe-eval' is required for Next.js dev mode and runtime features.
+            // For production, consider:
+            // 1. Using Next.js build with 'output: "standalone"' (already configured)
+            // 2. Implementing nonces for inline scripts (advanced)
+            // 3. Moving to Next.js Edge Runtime where possible
+            // Current config balances security with Next.js compatibility
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",

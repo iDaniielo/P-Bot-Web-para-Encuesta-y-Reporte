@@ -39,13 +39,20 @@ DROP POLICY IF EXISTS "Allow admin reads" ON public.encuestas;
 -- ----------------------------------------------------------------------------
 -- Allows anonymous users to submit survey responses
 -- This enables the public survey bot to function without authentication
+--
+-- ⚠️ SECURITY NOTE: This policy allows unrestricted inserts. For production:
+-- 1. Implement rate limiting (see STEP 7 below for SQL example)
+-- 2. Add input validation at application level (already implemented with Zod)
+-- 3. Consider adding CHECK constraints on the table for data validation
+-- 4. Monitor for abuse patterns in your application logs
 CREATE POLICY "Public can insert survey responses"
 ON public.encuestas
 FOR INSERT
 TO anon, authenticated
 WITH CHECK (
   -- Allow inserts for all users (anon and authenticated)
-  -- Validation should be done at application level
+  -- Application-level validation is done via Zod schemas
+  -- Consider adding: length(nombre) > 0 AND length(telefono) = 10 for DB-level validation
   true
 );
 
