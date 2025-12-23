@@ -1,0 +1,58 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export interface Database {
+  public: {
+    Tables: {
+      encuestas: {
+        Row: {
+          id: string;
+          created_at: string;
+          nombre: string;
+          telefono: string;
+          regalo: string;
+          lugar_compra: string;
+          gasto: string;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          nombre: string;
+          telefono: string;
+          regalo: string;
+          lugar_compra: string;
+          gasto: string;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          nombre?: string;
+          telefono?: string;
+          regalo?: string;
+          lugar_compra?: string;
+          gasto?: string;
+        };
+        Relationships: [];
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
+}
+
+export type Encuesta = Database['public']['Tables']['encuestas']['Row'];
