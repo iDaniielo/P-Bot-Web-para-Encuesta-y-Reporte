@@ -42,7 +42,8 @@ export default function DashboardPage() {
       return;
     }
     fetchEncuestas();
-  }, [isAuthenticated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, loading]);
 
   const handleLogout = async () => {
     setLoggingOut(true);

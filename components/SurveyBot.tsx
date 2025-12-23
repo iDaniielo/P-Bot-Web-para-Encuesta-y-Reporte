@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { surveyQuestions, surveySchema, type SurveyFormData } from '@/lib/survey-config';
+import Link from 'next/link';
 
 interface SurveyBotProps {
   onComplete: (data: SurveyFormData) => Promise<void>;
@@ -75,12 +76,12 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
         <p className="text-gray-800 text-lg mb-8">
           Tu respuesta ha sido registrada exitosamente.
         </p>
-        <a
+        <Link
           href="/"
           className="inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors"
         >
           Volver al Inicio
-        </a>
+        </Link>
       </motion.div>
     );
   }
