@@ -41,11 +41,18 @@ WITH CHECK (true);
 
 **Política 2: Lectura Solo Admin (Dashboard)**
 ```sql
-CREATE POLICY "Only authenticated users can read all responses"
+-- OPCIÓN RECOMENDADA para PRODUCCIÓN:
+CREATE POLICY "Only admins can read all responses"
 FOR SELECT TO authenticated
-USING (true);
--- Para producción: agregar (auth.jwt()->>'role')::text = 'admin'
+USING (
+  (auth.jwt()->>'role')::text = 'admin'
+);
 ```
+
+**⚠️ IMPORTANTE**: El archivo SQL incluye 3 opciones:
+- **Opción A**: Testing - Cualquier autenticado (menos seguro)
+- **Opción B**: Producción - Solo rol admin (RECOMENDADO) ← **Activo por defecto**
+- **Opción C**: Producción - Emails específicos (alternativa)
 
 ### 4. Documentación Completa de Seguridad ✅
 **Archivo**: `SECURITY.md` (14KB)

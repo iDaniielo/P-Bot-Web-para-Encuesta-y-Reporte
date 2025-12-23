@@ -52,24 +52,44 @@ WITH CHECK (
 -- ----------------------------------------------------------------------------
 -- POLICY 2: Admin-Only Reads (CEO Dashboard)
 -- ----------------------------------------------------------------------------
--- Restricts SELECT to authenticated users only
--- IMPORTANT: This basic policy grants read access to ALL authenticated users.
--- This is INTENTIONAL for demonstration/initial setup, allowing any authenticated
--- user to access the dashboard. For production, you MUST implement role-based
--- access control using the enhanced version below.
+-- ⚠️ SECURITY WARNING: The default policy below allows ALL authenticated users
+-- to read survey data. This is suitable for DEVELOPMENT/TESTING ONLY.
+-- For PRODUCTION, you MUST implement role-based access control.
+--
+-- Choose ONE of the following policies based on your security requirements:
+
+-- OPTION A: Development/Testing - Any authenticated user (LESS SECURE)
+-- Uncomment this for initial testing:
+/*
 CREATE POLICY "Only authenticated users can read all responses"
 ON public.encuestas
 FOR SELECT
 TO authenticated
+USING (true);
+*/
+
+-- OPTION B: Production - Only admin role (RECOMMENDED)
+-- Uncomment this for production deployment:
+CREATE POLICY "Only admins can read all responses"
+ON public.encuestas
+FOR SELECT
+TO authenticated
 USING (
-  -- Basic: Any authenticated user can read
-  -- This allows testing with any Supabase authenticated account
-  true
-  
-  -- For PRODUCTION, replace 'true' with role-based check:
-  -- (auth.jwt()->>'role')::text = 'admin'
-  -- OR auth.jwt()->>'email' = 'ceo@company.com'
+  -- Only users with admin role can read
+  (auth.jwt()->>'role')::text = 'admin'
 );
+
+-- OPTION C: Production - Specific email addresses (ALTERNATIVE)
+-- Uncomment this to restrict to specific CEO/admin emails:
+/*
+CREATE POLICY "Only specific admins can read all responses"
+ON public.encuestas
+FOR SELECT
+TO authenticated
+USING (
+  auth.jwt()->>'email' IN ('ceo@company.com', 'admin@company.com')
+);
+*/
 
 -- ============================================================================
 -- STEP 4: ALTERNATIVE - Role-Based Access Control (RECOMMENDED)

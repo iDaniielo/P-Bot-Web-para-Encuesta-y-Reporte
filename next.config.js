@@ -57,13 +57,13 @@ const nextConfig = {
             key: 'X-DNS-Prefetch-Control',
             value: 'off',
           },
-          {
-            // Strict Transport Security - Force HTTPS (only in production)
-            // Uncomment when deploying to production with HTTPS
-            // key: 'Strict-Transport-Security',
-            // value: 'max-age=63072000; includeSubDomains; preload',
-          },
-        ].filter(header => header.key), // Filter out commented headers
+          // Strict Transport Security - Force HTTPS (only in production)
+          // Uncomment when deploying to production with HTTPS:
+          // {
+          //   key: 'Strict-Transport-Security',
+          //   value: 'max-age=63072000; includeSubDomains; preload',
+          // },
+        ],
       },
     ];
   },
