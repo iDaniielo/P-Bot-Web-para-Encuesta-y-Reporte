@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { TrendingUp, ShoppingBag, Users, ArrowLeft, Loader2, Gift, DollarSign, LogOut } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Users, ArrowLeft, Loader2, Gift, DollarSign, LogOut, Download } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import type { Encuesta } from '@/types/database';
+import { exportToExcel } from '@/lib/excel-export';
 
 // Helper function to mask phone numbers (e.g., 5551234567 -> 55****4567)
 const maskPhone = (phone: string): string => {
@@ -38,7 +39,8 @@ export default function DashboardPage() {
 
   const fetchEncuestas = async () => {
     try {
-      const response = await fetch('/api/encuestas');
+      // Solicitar datos completos (teléfonos sin enmascarar) para el dashboard
+      const response = await fetch('/api/encuestas?full=true');
       const data = await response.json();
       
       // Handle error response or invalid data
@@ -70,12 +72,44 @@ export default function DashboardPage() {
     await logout();
   };
 
+  const handleExportExcel = () => {
+    exportToExcel(encuestas, 'reporte-encuestas-navidad');
+  };
+
   // Calculate KPIs
   const totalEncuestas = encuestas.length;
 
-  // Top 3 Gifts by frequency
+  // Top 3 Gifts by frequency - Handle arrays
   const giftCounts = encuestas.reduce((acc, curr) => {
-    acc[curr.regalo] = (acc[curr.regalo] || 0) + 1;
+    // Parse regalo if it's a string representation of an array
+    let regalos: string[] = [];
+    
+    if (typeof curr.regalo === 'string') {
+      try {
+        // Try to parse if it looks like an array
+        if (curr.regalo.startsWith('[')) {
+          regalos = JSON.parse(curr.regalo);
+        } else {
+          regalos = [curr.regalo];
+        }
+      } catch {
+        regalos = [curr.regalo];
+      }
+    } else if (Array.isArray(curr.regalo)) {
+      regalos = curr.regalo;
+    } else {
+      regalos = [String(curr.regalo)];
+    }
+    
+    // Count each gift individually
+    regalos.forEach(regalo => {
+      if (regalo === 'Otro' && curr.regalo_otro) {
+        acc[curr.regalo_otro] = (acc[curr.regalo_otro] || 0) + 1;
+      } else if (regalo !== 'Otro') {
+        acc[regalo] = (acc[regalo] || 0) + 1;
+      }
+    });
+    
     return acc;
   }, {} as Record<string, number>);
 
@@ -145,23 +179,33 @@ export default function DashboardPage() {
               <ArrowLeft className="w-5 h-5" />
               Volver al inicio
             </Link>
-            <button
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loggingOut ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Cerrando sesión...
-                </>
-              ) : (
-                <>
-                  <LogOut className="w-4 h-4" />
-                  Cerrar Sesión
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleExportExcel}
+                disabled={totalEncuestas === 0}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download className="w-4 h-4" />
+                Descargar Excel
+              </button>
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loggingOut ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Cerrando sesión...
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="w-4 h-4" />
+                    Cerrar Sesión
+                  </>
+                )}
+              </button>
+            </div>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             📊 Dashboard CEO
@@ -364,7 +408,33 @@ export default function DashboardPage() {
                         <td className="p-3 text-sm text-gray-600 font-mono">
                           {maskPhone(encuesta.telefono)}
                         </td>
-                        <td className="p-3 text-sm text-gray-600">{encuesta.regalo}</td>
+                        <td className="p-3 text-sm text-gray-600">
+                          {(() => {
+                            let regalos: string[] = [];
+                            if (typeof encuesta.regalo === 'string') {
+                              try {
+                                if (encuesta.regalo.startsWith('[')) {
+                                  regalos = JSON.parse(encuesta.regalo);
+                                } else {
+                                  regalos = [encuesta.regalo];
+                                }
+                              } catch {
+                                regalos = [encuesta.regalo];
+                              }
+                            } else if (Array.isArray(encuesta.regalo)) {
+                              regalos = encuesta.regalo;
+                            } else {
+                              regalos = [String(encuesta.regalo)];
+                            }
+                            
+                            // Replace "Otro" with actual value if exists
+                            const displayRegalos = regalos.map(r => 
+                              r === 'Otro' && encuesta.regalo_otro ? encuesta.regalo_otro : r
+                            );
+                            
+                            return displayRegalos.join(', ');
+                          })()}
+                        </td>
                         <td className="p-3 text-sm text-gray-600">{encuesta.lugar_compra}</td>
                         <td className="p-3 text-sm text-gray-600">{encuesta.gasto}</td>
                       </tr>

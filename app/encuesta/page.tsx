@@ -16,6 +16,7 @@ export default function EncuestaPage() {
             nombre: data.nombre,
             telefono: data.telefono,
             regalo: data.regalo,
+            regalo_otro: data.regalo_otro || null,
             lugar_compra: data.lugar_compra,
             gasto: data.gasto,
           },

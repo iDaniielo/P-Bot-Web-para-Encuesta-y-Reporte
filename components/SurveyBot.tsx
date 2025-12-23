@@ -73,15 +73,9 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
           ¡Gracias por participar!
         </h2>
-        <p className="text-gray-800 text-lg mb-8">
+        <p className="text-gray-800 text-lg">
           Tu respuesta ha sido registrada exitosamente.
         </p>
-        <Link
-          href="/"
-          className="inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors"
-        >
-          Volver al Inicio
-        </Link>
       </motion.div>
     );
   }
@@ -89,6 +83,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
   const renderField = () => {
     const fieldName = currentQuestion.id as keyof SurveyFormData;
     const error = errors[fieldName];
+    const selectedValues = getValues(fieldName as any) || [];
 
     switch (currentQuestion.type) {
       case 'text':
@@ -146,6 +141,50 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
                 <span className="ml-3 text-lg font-medium text-gray-900">{option}</span>
               </label>
             ))}
+            {error && (
+              <p className="mt-2 text-red-600 text-sm">{error.message}</p>
+            )}
+          </div>
+        );
+
+      case 'checkbox':
+        const showOtroField = Array.isArray(selectedValues) && selectedValues.includes('Otro');
+        
+        return (
+          <div>
+            <div className="space-y-3">
+              {currentQuestion.options?.map((option) => (
+                <label
+                  key={option}
+                  className="flex items-center p-4 border-2 border-gray-300 rounded-lg hover:border-red-500 cursor-pointer transition-colors bg-white"
+                >
+                  <input
+                    {...register(fieldName)}
+                    type="checkbox"
+                    value={option}
+                    className="w-5 h-5 text-red-600 focus:ring-red-500 rounded"
+                  />
+                  <span className="ml-3 text-lg font-medium text-gray-900">{option}</span>
+                </label>
+              ))}
+            </div>
+            
+            {showOtroField && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-4"
+              >
+                <input
+                  {...register('regalo_otro' as any)}
+                  type="text"
+                  placeholder="Especifica qué otro regalo..."
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
+                />
+              </motion.div>
+            )}
+            
             {error && (
               <p className="mt-2 text-red-600 text-sm">{error.message}</p>
             )}

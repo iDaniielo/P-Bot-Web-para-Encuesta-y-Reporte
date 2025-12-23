@@ -15,7 +15,8 @@ export interface Database {
           created_at: string;
           nombre: string;
           telefono: string;
-          regalo: string;
+          regalo: string | string[];
+          regalo_otro?: string | null;
           lugar_compra: string;
           gasto: string;
         };
@@ -24,7 +25,8 @@ export interface Database {
           created_at?: string;
           nombre: string;
           telefono: string;
-          regalo: string;
+          regalo: string | string[];
+          regalo_otro?: string | null;
           lugar_compra: string;
           gasto: string;
         };
@@ -33,7 +35,8 @@ export interface Database {
           created_at?: string;
           nombre?: string;
           telefono?: string;
-          regalo?: string;
+          regalo?: string | string[];
+          regalo_otro?: string | null;
           lugar_compra?: string;
           gasto?: string;
         };

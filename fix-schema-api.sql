@@ -1,14 +1,17 @@
 -- ============================================================================
--- MIGRAR TABLA ENCUESTAS DE PUBLIC A API SCHEMA
+-- CREAR TABLA ENCUESTAS EN API SCHEMA CON PERMISOS COMPLETOS
 -- ============================================================================
--- Ejecuta este script en Supabase SQL Editor
+-- Ejecuta este script COMPLETO en Supabase SQL Editor
 -- ============================================================================
 
 -- PASO 1: Crear el schema api si no existe
 CREATE SCHEMA IF NOT EXISTS api;
 
--- PASO 2: Crear la tabla en el schema api (copia de public.encuestas)
-CREATE TABLE IF NOT EXISTS api.encuestas (
+-- PASO 2: Eliminar tabla existente si hay conflictos
+DROP TABLE IF EXISTS api.encuestas CASCADE;
+
+-- PASO 3: Crear la tabla en el schema api
+CREATE TABLE api.encuestas (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT timezone('utc'::text, now()),
     nombre TEXT NOT NULL,
@@ -19,40 +22,54 @@ CREATE TABLE IF NOT EXISTS api.encuestas (
     CONSTRAINT encuestas_pkey PRIMARY KEY (id)
 );
 
--- PASO 3: Copiar datos de public.encuestas a api.encuestas (si existen)
-INSERT INTO api.encuestas (id, created_at, nombre, telefono, regalo, lugar_compra, gasto)
-SELECT id, created_at, nombre, telefono, regalo, lugar_compra, gasto
-FROM public.encuestas
-ON CONFLICT (id) DO NOTHING;
+-- PASO 4: Otorgar permisos explícitos a roles anon y authenticated
+GRANT USAGE ON SCHEMA api TO anon, authenticated;
+GRANT ALL ON api.encuestas TO anon, authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA api TO anon, authenticated;
 
--- PASO 4: Habilitar RLS en api.encuestas
+-- PASO 5: Habilitar RLS
 ALTER TABLE api.encuestas ENABLE ROW LEVEL SECURITY;
 
--- PASO 5: Eliminar políticas antiguas (si existen)
-DROP POLICY IF EXISTS "Allow public inserts" ON api.encuestas;
-DROP POLICY IF EXISTS "Allow public reads" ON api.encuestas;
-DROP POLICY IF EXISTS "Public can insert survey responses" ON api.encuestas;
-DROP POLICY IF EXISTS "Public can read survey responses" ON api.encuestas;
-
--- PASO 6: Crear políticas RLS para api.encuestas
-CREATE POLICY "Public can insert survey responses"
+-- PASO 6: Crear políticas RLS permisivas
+CREATE POLICY "Enable insert for anon and authenticated users"
 ON api.encuestas
 FOR INSERT
 TO anon, authenticated
 WITH CHECK (true);
 
-CREATE POLICY "Public can read survey responses"
+CREATE POLICY "Enable read for anon and authenticated users"
 ON api.encuestas
 FOR SELECT
 TO anon, authenticated
 USING (true);
 
--- PASO 7: Crear índices en api.encuestas
-CREATE INDEX IF NOT EXISTS idx_encuestas_created_at ON api.encuestas USING btree (created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_encuestas_lugar_compra ON api.encuestas USING btree (lugar_compra);
-CREATE INDEX IF NOT EXISTS idx_encuestas_regalo ON api.encuestas USING btree (regalo);
+CREATE POLICY "Enable update for anon and authenticated users"
+ON api.encuestas
+FOR UPDATE
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
 
--- PASO 8: Verificar las políticas
+CREATE POLICY "Enable delete for anon and authenticated users"
+ON api.encuestas
+FOR DELETE
+TO anon, authenticated
+USING (true);
+
+-- PASO 7: Crear índices
+CREATE INDEX idx_encuestas_created_at ON api.encuestas USING btree (created_at DESC);
+CREATE INDEX idx_encuestas_lugar_compra ON api.encuestas USING btree (lugar_compra);
+CREATE INDEX idx_encuestas_regalo ON api.encuestas USING btree (regalo);
+
+-- PASO 8: Verificar permisos
+SELECT 
+    grantee, 
+    privilege_type 
+FROM information_schema.role_table_grants 
+WHERE table_schema = 'api' 
+AND table_name = 'encuestas';
+
+-- PASO 9: Verificar políticas
 SELECT 
     schemaname,
     tablename,
@@ -63,7 +80,4 @@ SELECT
 FROM pg_policies
 WHERE tablename = 'encuestas' AND schemaname = 'api';
 
--- PASO 9: Verificar los datos migrados
-SELECT COUNT(*) as total_registros FROM api.encuestas;
-
-SELECT 'Migración completada exitosamente!' as status;
+SELECT '✅ Tabla creada exitosamente con todos los permisos!' as status;

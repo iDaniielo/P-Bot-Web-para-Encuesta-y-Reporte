@@ -2,18 +2,19 @@ import { z } from 'zod';
 
 export interface SurveyQuestion {
   id: string;
-  type: 'text' | 'tel' | 'select' | 'radio';
+  type: 'text' | 'tel' | 'select' | 'radio' | 'checkbox';
   question: string;
   placeholder?: string;
   options?: string[];
-  validation: z.ZodType<string>;
+  validation: z.ZodType<any>;
 }
 
 // Zod validation schemas
 export const surveySchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   telefono: z.string().regex(/^\d{10}$/, 'El número debe tener exactamente 10 dígitos'),
-  regalo: z.string().min(1, 'Este campo es requerido'),
+  regalo: z.array(z.string()).min(1, 'Selecciona al menos una opción'),
+  regalo_otro: z.string().optional(),
   lugar_compra: z.string().min(1, 'Selecciona una opción'),
   gasto: z.string().min(1, 'Selecciona un rango'),
 });
@@ -38,10 +39,19 @@ export const surveyQuestions: SurveyQuestion[] = [
   },
   {
     id: 'regalo',
-    type: 'text',
+    type: 'checkbox',
     question: '¿Qué vas a regalar esta Navidad?',
-    placeholder: 'Ej: Juguetes, ropa, electrónicos...',
-    validation: z.string().min(1, 'Este campo es requerido'),
+    options: [
+      'Juguetes',
+      'Ropa',
+      'Electrónicos',
+      'Libros',
+      'Perfumes/Cosméticos',
+      'Tarjetas de regalo',
+      'Alimentos/Bebidas',
+      'Otro',
+    ],
+    validation: z.array(z.string()).min(1, 'Selecciona al menos una opción'),
   },
   {
     id: 'lugar_compra',
