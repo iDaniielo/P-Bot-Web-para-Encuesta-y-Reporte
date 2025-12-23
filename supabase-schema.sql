@@ -20,12 +20,17 @@ CREATE POLICY "Allow public inserts" ON public.encuestas
     FOR INSERT
     WITH CHECK (true);
 
--- Create policy to allow authenticated reads (for dashboard)
+-- Create policy to allow public reads (for dashboard)
 -- ⚠️ SECURITY NOTE: This policy allows public reads for demonstration purposes.
 -- For production, you should:
 -- 1. Implement proper authentication (Supabase Auth, NextAuth.js, etc.)
 -- 2. Restrict reads to authenticated users only
 -- 3. Consider adding user roles and permissions
+-- 4. Enable 2FA for dashboard access
+-- 5. Implement rate limiting
+-- 6. Add audit logging
+-- 7. Use encryption at rest for sensitive data (phone numbers)
+-- 8. Implement strict RLS policies based on user roles
 -- Example for authenticated-only reads:
 -- CREATE POLICY "Allow authenticated reads" ON public.encuestas
 --     FOR SELECT
@@ -37,15 +42,15 @@ CREATE POLICY "Allow public reads" ON public.encuestas
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_encuestas_created_at ON public.encuestas(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_encuestas_lugar_compra ON public.encuestas(lugar_compra);
-CREATE INDEX IF NOT EXISTS idx_encuestas_gasto ON public.encuestas(gasto);
+CREATE INDEX IF NOT EXISTS idx_encuestas_regalo ON public.encuestas(regalo);
 
 -- Optional: Insert sample data for testing
 -- Uncomment the following lines to add test data
 /*
 INSERT INTO public.encuestas (nombre, telefono, regalo, lugar_compra, gasto) VALUES
-    ('Juan Pérez', '555-0101', 'Juguetes', 'Amazon', '$50-$100'),
-    ('María García', '555-0102', 'Ropa', 'Centro Comercial', '$100-$200'),
-    ('Carlos López', '555-0103', 'Electrónicos', 'Tienda Online', '$200-$500'),
-    ('Ana Martínez', '555-0104', 'Libros', 'Librería Local', 'Menos de $50'),
-    ('Luis Rodríguez', '555-0105', 'Perfumes', 'Departamental', '$50-$100');
+    ('Juan Pérez', '5551234567', 'Juguetes', 'Tienda Online (Amazon, MercadoLibre, etc.)', '$500-$1000'),
+    ('María García', '5559876543', 'Ropa', 'Centro Comercial', '$1000-$2000'),
+    ('Carlos López', '5556547890', 'Electrónicos', 'Tienda Online (Amazon, MercadoLibre, etc.)', '$2000-$5000'),
+    ('Ana Martínez', '5553216549', 'Libros', 'Tienda Local', 'Menos de $500'),
+    ('Luis Rodríguez', '5558529637', 'Perfumes', 'Tienda Departamental', '$500-$1000');
 */

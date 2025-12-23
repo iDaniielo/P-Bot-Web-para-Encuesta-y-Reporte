@@ -9,10 +9,10 @@ export interface SurveyQuestion {
   validation: z.ZodType<string>;
 }
 
-// Zod validation schemas
+// Zod validation schemas with strict phone validation for Mexico
 export const surveySchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  telefono: z.string().min(8, 'Ingresa un teléfono válido'),
+  telefono: z.string().regex(/^\d{10}$/, 'El teléfono debe tener exactamente 10 dígitos (sin espacios ni guiones)'),
   regalo: z.string().min(1, 'Este campo es requerido'),
   lugar_compra: z.string().min(1, 'Selecciona una opción'),
   gasto: z.string().min(1, 'Selecciona un rango'),
@@ -33,8 +33,8 @@ export const surveyQuestions: SurveyQuestion[] = [
     id: 'telefono',
     type: 'tel',
     question: '¿Cuál es tu número de teléfono?',
-    placeholder: 'Ej: 555-1234',
-    validation: z.string().min(8, 'Ingresa un teléfono válido'),
+    placeholder: 'Ej: 5551234567 (10 dígitos)',
+    validation: z.string().regex(/^\d{10}$/, 'El teléfono debe tener exactamente 10 dígitos (sin espacios ni guiones)'),
   },
   {
     id: 'regalo',
@@ -62,11 +62,11 @@ export const surveyQuestions: SurveyQuestion[] = [
     type: 'radio',
     question: '¿Cuánto planeas gastar en total?',
     options: [
-      'Menos de $50',
-      '$50-$100',
-      '$100-$200',
-      '$200-$500',
-      'Más de $500',
+      'Menos de $500',
+      '$500-$1000',
+      '$1000-$2000',
+      '$2000-$5000',
+      'Más de $5000',
     ],
     validation: z.string().min(1, 'Selecciona un rango'),
   },

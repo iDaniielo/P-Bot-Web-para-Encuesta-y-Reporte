@@ -1,57 +1,38 @@
 {
-  "name": "navidad-survey",
-  "version": "0.1.0",
-  "private": true,
   "name": "p-bot-web-para-encuesta-y-reporte",
   "version": "1.0.0",
-  "description": "",
+  "description": "Survey Bot + Dashboard with Next.js, Tailwind CSS, and Supabase",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "next": "^14.2.0",
-    "@supabase/supabase-js": "^2.39.0",
-    "react-hook-form": "^7.49.0",
-    "zod": "^3.22.0",
-    "@hookform/resolvers": "^3.3.0",
-    "recharts": "^2.10.0",
-    "framer-motion": "^10.16.0",
-    "lucide-react": "^0.300.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "typescript": "^5",
-    "tailwindcss": "^3.4.0",
-    "postcss": "^8",
-    "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "^14.2.0"
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
     "@supabase/supabase-js": "^2.89.0",
-    "next": "^16.1.1",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.469.0",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "recharts": "^2.15.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "^25.0.3",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "autoprefixer": "^10.4.23",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "^16.1.1",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3"
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "^15.1.6",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2"
   }
 }
