@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS api.encuestas (
     nombre TEXT NOT NULL,
     telefono TEXT NOT NULL,
     regalo TEXT NOT NULL,
+    regalo_otro TEXT,
     lugar_compra TEXT NOT NULL,
     gasto TEXT NOT NULL
 );
