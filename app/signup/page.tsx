@@ -38,6 +38,9 @@ export default function SignupPage() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
       });
 
       if (signUpError) {
@@ -46,15 +49,23 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        setSuccess('¡Cuenta creada! Revisa tu email para confirmar tu cuenta.');
+        // Si no requiere confirmación, redirigir directamente
+        if (data.session) {
+          setSuccess('¡Cuenta creada exitosamente!');
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 1000);
+        } else {
+          // Si requiere confirmación
+          setSuccess('¡Cuenta creada! Revisa tu email para confirmar tu cuenta.');
+          setTimeout(() => {
+            router.push('/login');
+          }, 3000);
+        }
+        
         setEmail('');
         setPassword('');
         setConfirmPassword('');
-
-        // Redirigir a login después de 2 segundos
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
       }
     } catch (err) {
       setError('Error al crear la cuenta. Intenta de nuevo.');
