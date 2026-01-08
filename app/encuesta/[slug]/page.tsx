@@ -1,18 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 import SurveyBot from '@/components/SurveyBot';
 import type { SurveyFormData } from '@/lib/survey-config';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import type { Survey } from '@/types/database';
-import { DEFAULT_SURVEY_ID } from '@/lib/constants';
 
-export default function EncuestaPage() {
-  const searchParams = useSearchParams();
-  const surveyId = searchParams.get('surveyId') || DEFAULT_SURVEY_ID;
+export default function EncuestaSlugPage() {
+  const params = useParams();
+  const slug = params.slug as string;
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,28 +19,33 @@ export default function EncuestaPage() {
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
-        const response = await fetch(`/api/surveys?status=active`);
-        if (response.ok) {
-          const data = await response.json();
-          const foundSurvey = data.surveys?.find((s: Survey) => s.id === surveyId);
-          
-          if (foundSurvey) {
-            setSurvey(foundSurvey);
+        // Fetch survey by slug
+        const response = await fetch(`/api/surveys?slug=${slug}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Encuesta no encontrada');
           } else {
-            // If not found, try to load default survey
-            setSurvey({
-              id: DEFAULT_SURVEY_ID,
-              title: 'Encuesta Navideña 2024',
-              description: 'Encuesta sobre planes y compras navideñas',
-              slug: 'navidad',
-              status: 'active',
-              survey_group_id: null,
-              created_by: null,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            });
+            setError('Error al cargar la encuesta');
           }
+          return;
         }
+
+        const data = await response.json();
+        const foundSurvey = data.survey;
+        
+        if (!foundSurvey) {
+          setError('Encuesta no encontrada');
+          return;
+        }
+
+        // Check if survey is active
+        if (foundSurvey.status !== 'active') {
+          setError('Esta encuesta no está disponible actualmente');
+          return;
+        }
+
+        setSurvey(foundSurvey);
       } catch (err) {
         console.error('Error loading survey:', err);
         setError('Error al cargar la encuesta');
@@ -50,12 +54,16 @@ export default function EncuestaPage() {
       }
     };
 
-    fetchSurvey();
-  }, [surveyId]);
+    if (slug) {
+      fetchSurvey();
+    }
+  }, [slug]);
 
   const handleSurveyComplete = async (data: SurveyFormData) => {
+    if (!survey) return;
+
     try {
-      // Preparar datos - solo campos que existen en la tabla encuestas
+      // Prepare survey data
       const surveyData: any = {
         nombre: data.nombre || '',
         telefono: data.telefono || '',
@@ -63,8 +71,8 @@ export default function EncuestaPage() {
         regalo_otro: data.regalo_otro || null,
         lugar_compra: data.lugar_compra || '',
         gasto: data.gasto || '',
-        respuestas: data, // Guardar todas las respuestas en JSON
-        survey_id: surveyId, // Associate with survey
+        respuestas: data, // Save all responses in JSON
+        survey_id: survey.id, // Associate with survey
       };
 
       console.log('Sending survey data:', surveyData);
@@ -109,10 +117,16 @@ export default function EncuestaPage() {
       <main className="min-h-screen bg-gradient-to-br from-red-50 via-white to-green-50 p-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-20">
-            <p className="text-red-600 text-lg mb-4">{error || 'Encuesta no encontrada'}</p>
+            <div className="text-6xl mb-4">😔</div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              {error || 'Encuesta no encontrada'}
+            </h1>
+            <p className="text-gray-600 mb-8">
+              La encuesta que buscas no existe o no está disponible en este momento.
+            </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               Volver al inicio
@@ -140,7 +154,7 @@ export default function EncuestaPage() {
               {survey.title}
             </h1>
             {survey.description && (
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-lg">
                 {survey.description}
               </p>
             )}
@@ -149,7 +163,7 @@ export default function EncuestaPage() {
 
         {/* Survey Bot */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <SurveyBot onComplete={handleSurveyComplete} surveyId={surveyId} />
+          <SurveyBot onComplete={handleSurveyComplete} surveyId={survey.id} />
         </div>
       </div>
     </main>

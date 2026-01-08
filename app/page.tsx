@@ -84,7 +84,7 @@ export default function Home() {
 
           {/* Legacy Survey Link (default) */}
           <Link
-            href="/encuesta"
+            href="/encuestas"
             className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 border-2 border-transparent hover:border-red-500"
           >
             <div className="flex flex-col items-center text-center space-y-4">
@@ -92,13 +92,13 @@ export default function Home() {
                 <Gift className="w-10 h-10 text-red-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">
-                Encuesta Navideña 2024
+                Ver Encuestas
               </h2>
               <p className="text-gray-600">
-                Cuéntanos sobre tus planes de regalos navideños
+                Explora todas las encuestas disponibles
               </p>
               <span className="inline-block text-red-600 font-semibold group-hover:translate-x-2 transition-transform">
-                Comenzar →
+                Ver todas →
               </span>
             </div>
           </Link>
@@ -137,7 +137,7 @@ export default function Home() {
                     {groupSurveys.map((survey) => (
                       <Link
                         key={survey.id}
-                        href={`/encuesta?surveyId=${survey.id}`}
+                        href={`/encuesta/${survey.slug}`}
                         className="group block bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-transparent hover:border-blue-500 hover:shadow-lg transition-all duration-300"
                       >
                         <h4 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">

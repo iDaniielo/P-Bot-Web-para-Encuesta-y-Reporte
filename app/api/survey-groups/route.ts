@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase-server';
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
 // GET - List all survey groups
 export async function GET() {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     const { data: groups, error } = await supabase
       .from('survey_groups')
@@ -37,7 +37,7 @@ export async function GET() {
 // POST - Create a new survey group
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     // Check authentication
     const {
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 // PATCH - Update a survey group
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     // Check authentication
     const {
@@ -155,7 +155,7 @@ export async function PATCH(request: NextRequest) {
 // DELETE - Delete a survey group
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     // Check authentication
     const {
