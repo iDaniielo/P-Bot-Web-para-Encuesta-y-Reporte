@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import type { Encuesta } from '@/types/database';
 import { exportToExcel } from '@/lib/excel-export';
 import QuestionManager from '@/components/QuestionManager';
+import FAQChat from '@/components/FAQChat';
 
 // Helper function to mask phone numbers (e.g., 5551234567 -> 55****4567)
 const maskPhone = (phone: string): string => {
@@ -572,6 +573,9 @@ export default function DashboardPage() {
           <QuestionManager />
         )}
       </div>
+
+      {/* FAQ Chat - Only visible in CEO Dashboard */}
+      <FAQChat />
     </main>
   );
 }
