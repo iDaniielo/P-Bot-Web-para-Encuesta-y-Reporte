@@ -530,7 +530,7 @@ function SurveyForm({
       // Notify parent to refresh groups
       if (onGroupCreated) {
         try {
-          await onGroupCreated();
+          await Promise.resolve(onGroupCreated());
         } catch (refreshError) {
           console.error('Error refreshing groups:', refreshError);
           // Group was created successfully, but list refresh failed
@@ -625,7 +625,7 @@ function SurveyForm({
               <select
                 value={formData.survey_group_id || ''}
                 onChange={(e) =>
-                  setFormData({ ...formData, survey_group_id: e.target.value || null })
+                  setFormData((prev) => ({ ...prev, survey_group_id: e.target.value || null }))
                 }
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
               >
@@ -657,6 +657,10 @@ function SurveyForm({
                   }}
                   placeholder="Nombre del nuevo grupo"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                  autoFocus
+                  aria-label="Nombre del nuevo grupo"
+                  aria-describedby={groupError ? 'group-error' : undefined}
+                  aria-invalid={!!groupError}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -685,7 +689,9 @@ function SurveyForm({
                 </button>
               </div>
               {groupError && (
-                <p className="text-red-500 text-xs">{groupError}</p>
+                <p id="group-error" className="text-red-500 text-xs" role="alert">
+                  {groupError}
+                </p>
               )}
             </div>
           )}
