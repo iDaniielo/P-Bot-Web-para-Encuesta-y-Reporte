@@ -33,6 +33,7 @@ export default function EncuestaPage() {
               id: DEFAULT_SURVEY_ID,
               title: 'Encuesta Navideña 2024',
               description: 'Encuesta sobre planes y compras navideñas',
+              slug: 'navidad',
               status: 'active',
               survey_group_id: null,
               created_by: null,

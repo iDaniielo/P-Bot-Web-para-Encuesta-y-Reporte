@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase-server';
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const includeQuestions = searchParams.get('includeQuestions') === 'true';
     const includeCounts = searchParams.get('includeCounts') === 'true';
 
-    const supabase = createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     let query = supabase
       .from('surveys')
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     // Apply filters
-    if (status) {
+    if (status && (status === 'draft' || status === 'active' || status === 'archived')) {
       query = query.eq('status', status);
     }
 
@@ -55,8 +55,18 @@ export async function GET(request: NextRequest) {
     }
 
     if (slug) {
-      query = query.eq('slug', slug).single();
-      const { data: survey, error } = await query;
+      const { data: survey, error } = await supabase
+        .from('surveys')
+        .select(`
+          *,
+          survey_groups (
+            id,
+            name,
+            description
+          )
+        `)
+        .eq('slug', slug)
+        .single();
 
       if (error) {
         console.error('Error fetching survey by slug:', error);
@@ -138,7 +148,7 @@ export async function GET(request: NextRequest) {
 // POST - Create a new survey
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     // Check authentication
     const {
@@ -234,7 +244,7 @@ export async function POST(request: NextRequest) {
 // PATCH - Update a survey
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     // Check authentication
     const {
@@ -356,7 +366,7 @@ export async function PATCH(request: NextRequest) {
 // DELETE - Delete a survey
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     // Check authentication
     const {
