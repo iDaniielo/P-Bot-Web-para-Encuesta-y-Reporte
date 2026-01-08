@@ -651,6 +651,11 @@ function SurveyForm({
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       handleCreateGroup();
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault();
+                      setIsCreatingGroup(false);
+                      setNewGroupName('');
+                      setGroupError('');
                     }
                   }}
                 />
