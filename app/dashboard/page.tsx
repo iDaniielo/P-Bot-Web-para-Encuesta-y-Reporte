@@ -277,6 +277,12 @@ export default function DashboardPage() {
               <Settings className="w-4 h-4" />
               Gestión de Preguntas
             </button>
+            <Link
+              href="/dashboard/surveys"
+              className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm transition-colors flex items-center gap-2"
+            >
+              📋 Gestión de Encuestas
+            </Link>
           </nav>
         </div>
 

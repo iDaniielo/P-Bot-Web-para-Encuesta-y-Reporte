@@ -10,6 +10,7 @@ import Link from 'next/link';
 
 interface SurveyBotProps {
   onComplete: (data: SurveyFormData) => Promise<void>;
+  surveyId?: string;
 }
 
 // Helper para crear validación Zod basada en el tipo de pregunta
@@ -29,7 +30,7 @@ function createValidation(question: SurveyQuestion): z.ZodType<any> {
   }
 }
 
-export default function SurveyBot({ onComplete }: SurveyBotProps) {
+export default function SurveyBot({ onComplete, surveyId }: SurveyBotProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -40,7 +41,10 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch('/api/questions');
+        const url = surveyId 
+          ? `/api/questions?surveyId=${surveyId}`
+          : '/api/questions';
+        const response = await fetch(url);
         
         if (response.ok) {
           const data = await response.json();
@@ -57,7 +61,7 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
     };
 
     fetchQuestions();
-  }, []);
+  }, [surveyId]);
 
   const {
     register,

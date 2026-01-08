@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, MoveUp, MoveDown, Copy } from 'lucide-react';
+import type { Survey } from '@/types/database';
 
 interface Question {
   id?: string;
@@ -12,9 +13,12 @@ interface Question {
   validation_rules?: Record<string, any>;
   order_index: number;
   is_active: boolean;
+  survey_id?: string | null;
 }
 
 export default function QuestionManager() {
+  const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [selectedSurveyId, setSelectedSurveyId] = useState<string>('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,11 +34,42 @@ export default function QuestionManager() {
     is_active: true,
   });
 
-  // Cargar preguntas
+  // Load surveys on mount
+  useEffect(() => {
+    const fetchSurveys = async () => {
+      try {
+        const response = await fetch('/api/surveys');
+        if (response.ok) {
+          const data = await response.json();
+          const surveyList = data.surveys || [];
+          setSurveys(surveyList);
+          // Set default survey if available
+          if (surveyList.length > 0) {
+            setSelectedSurveyId(surveyList[0].id);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading surveys:', err);
+      }
+    };
+
+    fetchSurveys();
+  }, []);
+
+  // Cargar preguntas when survey changes
+  useEffect(() => {
+    if (selectedSurveyId) {
+      fetchQuestions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSurveyId]);
+
   const fetchQuestions = async () => {
+    if (!selectedSurveyId) return;
+    
     try {
       setLoading(true);
-      const response = await fetch('/api/questions?active=false'); // Obtener todas las preguntas incluyendo inactivas
+      const response = await fetch(`/api/questions?active=false&surveyId=${selectedSurveyId}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -62,19 +97,20 @@ export default function QuestionManager() {
     }
   };
 
-  useEffect(() => {
-    fetchQuestions();
-  }, []);
-
   // Crear pregunta
   const handleCreate = async () => {
     try {
       setValidationErrors({});
       
+      const questionData = {
+        ...formData,
+        survey_id: selectedSurveyId, // Associate with selected survey
+      };
+      
       const response = await fetch('/api/questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(questionData),
       });
 
       const result = await response.json();
@@ -285,6 +321,37 @@ export default function QuestionManager() {
 
   return (
     <div className="space-y-6">
+      {/* Survey Selector */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Selecciona una encuesta para gestionar sus preguntas:
+        </label>
+        <select
+          value={selectedSurveyId}
+          onChange={(e) => setSelectedSurveyId(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          disabled={surveys.length === 0}
+        >
+          {surveys.length === 0 ? (
+            <option value="">No hay encuestas disponibles</option>
+          ) : (
+            surveys.map((survey) => (
+              <option key={survey.id} value={survey.id}>
+                {survey.title} {survey.status !== 'active' ? `(${survey.status})` : ''}
+              </option>
+            ))
+          )}
+        </select>
+        {surveys.length === 0 && (
+          <p className="mt-2 text-sm text-gray-600">
+            Crea una encuesta primero en la{' '}
+            <a href="/dashboard/surveys" className="text-blue-600 hover:underline">
+              gestión de encuestas
+            </a>
+          </p>
+        )}
+      </div>
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Gestión de Preguntas</h2>
@@ -294,6 +361,7 @@ export default function QuestionManager() {
             resetForm();
           }}
           className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          disabled={!selectedSurveyId}
         >
           <Plus className="h-5 w-5" />
           <span className="font-bold">Nueva Pregunta</span>
@@ -467,7 +535,13 @@ export default function QuestionManager() {
           </div>
         ))}
 
-        {questions.length === 0 && !isCreating && (
+        {!selectedSurveyId && !isCreating && (
+          <div className="text-center py-12 text-gray-500">
+            <p className="mb-2">Selecciona una encuesta arriba para gestionar sus preguntas</p>
+          </div>
+        )}
+
+        {selectedSurveyId && questions.length === 0 && !isCreating && (
           <div className="text-center py-12 text-gray-500">
             No hay preguntas creadas. Haz clic en &quot;Nueva Pregunta&quot; para comenzar.
           </div>
