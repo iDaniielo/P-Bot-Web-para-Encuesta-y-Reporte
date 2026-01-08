@@ -1,6 +1,16 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
+
+// Type for support request data
+type SupportRequestData = {
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+};
 
 // Validation schema using Zod
 const contactSupportSchema = z.object({
@@ -25,7 +35,10 @@ function sanitizeInput(input: string): string {
 }
 
 // Check rate limiting: max 3 requests per user every 10 minutes
-async function checkRateLimit(supabase: any, userId: string): Promise<boolean> {
+async function checkRateLimit(
+  supabase: SupabaseClient<Database>, 
+  userId: string
+): Promise<boolean> {
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   
   // Clean up old entries first
@@ -70,9 +83,7 @@ async function checkRateLimit(supabase: any, userId: string): Promise<boolean> {
 }
 
 // Send email notification to admin
-async function sendEmailNotification(
-  data: { name: string; email: string; phone?: string; message: string }
-) {
+async function sendEmailNotification(data: SupportRequestData) {
   try {
     // Get the admin email from environment variable
     const adminEmail = process.env.ADMIN_EMAIL;
@@ -155,12 +166,7 @@ export async function POST(request: Request) {
     const { name, email, phone, message } = validationResult.data;
     
     // Sanitize inputs
-    const sanitizedData: {
-      name: string;
-      email: string;
-      phone?: string;
-      message: string;
-    } = {
+    const sanitizedData: SupportRequestData = {
       name: sanitizeInput(name),
       email: sanitizeInput(email),
       message: sanitizeInput(message),
