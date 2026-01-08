@@ -38,6 +38,7 @@ export default function DynamicDashboard({ surveyId }: DynamicDashboardProps) {
 
   useEffect(() => {
     fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [surveyId]);
 
   const fetchDashboardData = async () => {

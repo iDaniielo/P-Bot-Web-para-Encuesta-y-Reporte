@@ -9,10 +9,10 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { surveyId: string } }
+  context: { params: Promise<{ surveyId: string }> }
 ) {
   try {
-    const { surveyId } = params;
+    const { surveyId } = await context.params;
     const { searchParams } = new URL(request.url);
     const questionId = searchParams.get('questionId');
 
@@ -27,7 +27,7 @@ export async function GET(
 
     // Si se especifica una pregunta específica, obtener solo sus estadísticas
     if (questionId) {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .rpc('calculate_question_statistics', {
           p_survey_id: surveyId,
           p_question_id: questionId,
@@ -45,7 +45,7 @@ export async function GET(
     }
 
     // Si no se especifica pregunta, obtener estadísticas generales
-    const { data: summary, error: summaryError } = await supabase
+    const { data: summary, error: summaryError } = await (supabase as any)
       .from('survey_statistics_summary')
       .select('*')
       .eq('survey_id', surveyId)
@@ -85,7 +85,7 @@ export async function GET(
     // Calcular estadísticas para cada pregunta
     const questionsWithStats = await Promise.all(
       (questions || []).map(async (question) => {
-        const { data: stats } = await supabase
+        const { data: stats } = await (supabase as any)
           .rpc('calculate_question_statistics', {
             p_survey_id: surveyId,
             p_question_id: question.id,

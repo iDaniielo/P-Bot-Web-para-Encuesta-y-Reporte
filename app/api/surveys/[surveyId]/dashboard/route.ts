@@ -9,10 +9,10 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { surveyId: string } }
+  context: { params: Promise<{ surveyId: string }> }
 ) {
   try {
-    const { surveyId } = params;
+    const { surveyId } = await context.params;
 
     if (!surveyId) {
       return NextResponse.json(
@@ -24,7 +24,7 @@ export async function GET(
     const supabase = await createServerSupabaseClient();
 
     // Usar la función de base de datos para obtener el dashboard completo
-    const { data: dashboardData, error: dashboardError } = await supabase
+    const { data: dashboardData, error: dashboardError } = await (supabase as any)
       .rpc('get_survey_dashboard', { p_survey_id: surveyId });
 
     if (dashboardError) {

@@ -9,10 +9,17 @@ import DynamicDashboard from '@/components/DynamicDashboard';
 export default function SurveyDashboardPage({ 
   params 
 }: { 
-  params: { surveyId: string } 
+  params: Promise<{ surveyId: string }> 
 }) {
   const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [surveyId, setSurveyId] = useState<string>('');
+
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setSurveyId(resolvedParams.surveyId);
+    });
+  }, [params]);
 
   useEffect(() => {
     // Wait for auth to be checked
@@ -21,7 +28,7 @@ export default function SurveyDashboardPage({
     }
   }, [isAuthenticated]);
 
-  if (loading || isAuthenticated === null) {
+  if (loading || isAuthenticated === null || !surveyId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
@@ -50,7 +57,7 @@ export default function SurveyDashboardPage({
         </div>
 
         {/* Dynamic Dashboard Component */}
-        <DynamicDashboard surveyId={params.surveyId} />
+        <DynamicDashboard surveyId={surveyId} />
       </div>
     </main>
   );

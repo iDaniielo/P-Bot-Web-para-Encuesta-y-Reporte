@@ -10,10 +10,10 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { surveyId: string } }
+  context: { params: Promise<{ surveyId: string }> }
 ) {
   try {
-    const { surveyId } = params;
+    const { surveyId } = await context.params;
 
     if (!surveyId) {
       return NextResponse.json(
@@ -68,7 +68,7 @@ export async function GET(
     }
 
     // Obtener estadísticas usando la función de base de datos
-    const { data: dashboardData } = await supabase
+    const { data: dashboardData } = await (supabase as any)
       .rpc('get_survey_dashboard', { p_survey_id: surveyId });
 
     // Crear el workbook
