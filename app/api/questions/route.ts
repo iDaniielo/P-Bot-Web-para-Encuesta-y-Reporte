@@ -294,6 +294,7 @@ export async function POST(request: Request) {
       validation_rules: body.validation_rules || { required: true },
       order_index: body.order_index || nextOrderIndex,
       is_active: body.is_active !== undefined ? body.is_active : true,
+      survey_id: body.survey_id || null, // Include survey_id from request
     };
 
     const { data, error } = await supabase
