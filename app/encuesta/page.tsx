@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 import SurveyBot from '@/components/SurveyBot';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { Survey } from '@/types/database';
 import { DEFAULT_SURVEY_ID } from '@/lib/constants';
 
-export default function EncuestaPage() {
+function EncuestaContent() {
   const searchParams = useSearchParams();
   const surveyId = searchParams.get('surveyId') || DEFAULT_SURVEY_ID;
   const [survey, setSurvey] = useState<Survey | null>(null);
@@ -153,5 +153,22 @@ export default function EncuestaPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function EncuestaPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-gradient-to-br from-red-50 via-white to-green-50 p-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
+            <p className="text-gray-600">Cargando encuesta...</p>
+          </div>
+        </div>
+      </main>
+    }>
+      <EncuestaContent />
+    </Suspense>
   );
 }
