@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { MessageCircle, X, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 
 interface FAQ {
+  id: string;
   question: string;
   answer: string;
   category: 'general' | 'questions' | 'dashboard';
@@ -11,61 +12,73 @@ interface FAQ {
 
 const faqs: FAQ[] = [
   {
+    id: 'q1',
     question: '¿Cómo agrego una nueva pregunta?',
     answer: 'Ve a la pestaña "Gestión de Preguntas" y haz clic en el botón "Nueva Pregunta" en la parte superior derecha. Completa el formulario con el texto de la pregunta, la clave única, el tipo de pregunta y las opciones si aplica.',
     category: 'questions',
   },
   {
+    id: 'q2',
     question: '¿Qué tipos de preguntas puedo crear?',
     answer: 'Puedes crear 5 tipos de preguntas: Texto (respuesta libre), Teléfono (validación de número), Checkbox (selección múltiple), Radio (selección única), y Select (lista desplegable).',
     category: 'questions',
   },
   {
+    id: 'q3',
     question: '¿Cómo reordeno las preguntas?',
     answer: 'Usa los botones de flechas (↑ ↓) al lado derecho de cada pregunta para moverlas hacia arriba o abajo. El orden determina cómo se muestran en la encuesta.',
     category: 'questions',
   },
   {
+    id: 'q4',
     question: '¿Qué es la "clave única" de una pregunta?',
     answer: 'Es un identificador único para cada pregunta (ej: "nombre", "telefono"). Solo puede contener letras minúsculas, números y guiones bajos. Puedes usar el botón "Auto-generar" para crear una automáticamente.',
     category: 'questions',
   },
   {
+    id: 'q5',
     question: '¿Puedo usar plantillas predefinidas?',
     answer: 'Sí, al crear una nueva pregunta verás plantillas rápidas en la parte superior. Haz clic en cualquiera para usarla como base y luego personalizarla.',
     category: 'questions',
   },
   {
+    id: 'q6',
     question: '¿Cómo agrego opciones a una pregunta tipo checkbox/radio/select?',
     answer: 'Al seleccionar estos tipos, aparecerá un campo de texto donde puedes escribir las opciones, una por línea. Por ejemplo:\nOpción 1\nOpción 2\nOpción 3',
     category: 'questions',
   },
   {
+    id: 'q7',
     question: '¿Cómo desactivo una pregunta temporalmente?',
     answer: 'Al editar una pregunta, desmarca la casilla "Pregunta activa". La pregunta permanecerá en el sistema pero no se mostrará en la encuesta.',
     category: 'questions',
   },
   {
+    id: 'q8',
     question: '¿Puedo duplicar una pregunta existente?',
     answer: 'Sí, usa el botón de copiar (icono de doble cuadrado) al lado de cada pregunta. Se creará una copia que podrás modificar antes de guardar.',
     category: 'questions',
   },
   {
+    id: 'q9',
     question: '¿Cómo elimino una pregunta?',
     answer: 'Haz clic en el botón de basura (🗑️) al lado de la pregunta. Ten cuidado, esta acción no se puede deshacer. Se te pedirá confirmación antes de eliminar.',
     category: 'questions',
   },
   {
+    id: 'd1',
     question: '¿Cómo exporto los datos de las encuestas?',
     answer: 'En la pestaña Dashboard, haz clic en el botón "Descargar Excel" en la parte superior. Se generará un archivo Excel con todas las respuestas de las encuestas.',
     category: 'dashboard',
   },
   {
+    id: 'd2',
     question: '¿Qué significan las métricas del dashboard?',
     answer: 'El dashboard muestra: Total de Respuestas (cuántas personas completaron la encuesta), Gasto Promedio (promedio estimado de presupuestos), Regalo Más Popular (el más seleccionado), y Lugar Más Popular (donde más compran).',
     category: 'dashboard',
   },
   {
+    id: 'g1',
     question: '¿Los números de teléfono están protegidos?',
     answer: 'Sí, los números de teléfono se enmascaran en el dashboard mostrando solo los primeros 2 y últimos 4 dígitos (ej: 55****4567) para proteger la privacidad de los usuarios.',
     category: 'general',
@@ -86,6 +99,14 @@ export default function FAQChat() {
   const filteredFAQs = selectedCategory === 'all' 
     ? faqs 
     : faqs.filter(faq => faq.category === selectedCategory);
+
+  // Memoize category counts to avoid recalculating on every render
+  const categoryCounts = useMemo(() => ({
+    all: faqs.length,
+    questions: faqs.filter(f => f.category === 'questions').length,
+    dashboard: faqs.filter(f => f.category === 'dashboard').length,
+    general: faqs.filter(f => f.category === 'general').length,
+  }), []);
 
   return (
     <>
@@ -137,7 +158,7 @@ export default function FAQChat() {
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
                 }`}
               >
-                Todos ({faqs.length})
+                Todos ({categoryCounts.all})
               </button>
               <button
                 onClick={() => setSelectedCategory('questions')}
@@ -147,7 +168,7 @@ export default function FAQChat() {
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
                 }`}
               >
-                Preguntas ({faqs.filter(f => f.category === 'questions').length})
+                Preguntas ({categoryCounts.questions})
               </button>
               <button
                 onClick={() => setSelectedCategory('dashboard')}
@@ -157,7 +178,7 @@ export default function FAQChat() {
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
                 }`}
               >
-                Dashboard ({faqs.filter(f => f.category === 'dashboard').length})
+                Dashboard ({categoryCounts.dashboard})
               </button>
               <button
                 onClick={() => setSelectedCategory('general')}
@@ -167,7 +188,7 @@ export default function FAQChat() {
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
                 }`}
               >
-                General ({faqs.filter(f => f.category === 'general').length})
+                General ({categoryCounts.general})
               </button>
             </div>
           </div>
@@ -177,7 +198,7 @@ export default function FAQChat() {
             {filteredFAQs.length > 0 ? (
               filteredFAQs.map((faq, index) => (
                 <div
-                  key={index}
+                  key={faq.id}
                   className="border border-gray-200 rounded-lg overflow-hidden hover:border-blue-300 transition-colors"
                 >
                   <button
