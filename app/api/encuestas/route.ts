@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 
 // Helper function to mask phone numbers (e.g., 5551234567 -> 55****4567)
@@ -11,6 +11,8 @@ const maskPhone = (phone: string): string => {
 
 export async function GET(request: Request) {
   try {
+    const supabase = await createServerSupabaseClient();
+    
     const { searchParams } = new URL(request.url);
     const showFullData = searchParams.get('full') === 'true';
 

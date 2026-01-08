@@ -139,3 +139,28 @@ GRANT ALL ON api.survey_questions TO authenticated;
 GRANT SELECT ON api.survey_questions TO anon;
 GRANT ALL ON api.encuestas TO authenticated;
 GRANT INSERT ON api.encuestas TO anon;
+
+-- ============================================================================
+-- 11. INSERTAR PREGUNTAS INICIALES DE LA ENCUESTA
+-- ============================================================================
+INSERT INTO api.survey_questions (question_text, question_key, question_type, validation_rules, order_index, is_active)
+VALUES 
+    ('¿Cuál es tu nombre completo?', 'nombre', 'text', '{"required": true, "minLength": 2}'::jsonb, 1, true),
+    ('¿Cuál es tu número de teléfono?', 'telefono', 'phone', '{"required": true, "pattern": "^[0-9]{10}$"}'::jsonb, 2, true),
+    ('¿Qué regalo te gustaría recibir?', 'regalo', 'checkbox', '{"required": true}'::jsonb, 3, true),
+    ('¿Dónde compraste tus regalos?', 'lugar_compra', 'select', '{"required": true}'::jsonb, 4, true),
+    ('¿Cuánto gastaste aproximadamente?', 'gasto', 'select', '{"required": true}'::jsonb, 5, true)
+ON CONFLICT (question_key) DO NOTHING;
+
+-- Actualizar opciones para preguntas de selección múltiple
+UPDATE api.survey_questions 
+SET options = '["Juguetes", "Ropa", "Electrónicos", "Libros", "Otro"]'::jsonb
+WHERE question_key = 'regalo';
+
+UPDATE api.survey_questions 
+SET options = '["Tienda física", "Tienda en línea", "Ambas"]'::jsonb
+WHERE question_key = 'lugar_compra';
+
+UPDATE api.survey_questions 
+SET options = '["Menos de $500", "$500 - $1,000", "$1,000 - $2,000", "Más de $2,000"]'::jsonb
+WHERE question_key = 'gasto';
