@@ -170,13 +170,49 @@ export default function SurveyBot({ onComplete }: SurveyBotProps) {
 
     switch (currentQuestion.type) {
       case 'text':
+        return (
+          <div>
+            <input
+              {...register(fieldName)}
+              type="text"
+              placeholder={currentQuestion.placeholder}
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
+              autoFocus
+            />
+            {error && (
+              <p className="mt-2 text-red-600 text-sm">{error.message?.toString()}</p>
+            )}
+          </div>
+        );
+      
       case 'tel':
         return (
           <div>
             <input
               {...register(fieldName)}
-              type={currentQuestion.type}
+              type="tel"
               placeholder={currentQuestion.placeholder}
+              maxLength={10}
+              onKeyPress={(e) => {
+                // Solo permitir números
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+              onPaste={(e) => {
+                // Filtrar solo números al pegar
+                const pasteData = e.clipboardData.getData('text');
+                const onlyNumbers = pasteData.replace(/\D/g, '');
+                if (onlyNumbers !== pasteData) {
+                  e.preventDefault();
+                  const target = e.target as HTMLInputElement;
+                  const start = target.selectionStart || 0;
+                  const end = target.selectionEnd || 0;
+                  const currentValue = target.value;
+                  const newValue = currentValue.substring(0, start) + onlyNumbers + currentValue.substring(end);
+                  target.value = newValue.substring(0, 10);
+                }
+              }}
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
               autoFocus
             />
