@@ -280,7 +280,6 @@ export default function QuestionManager() {
     setValidationErrors({});
   };
 
-
   const handleOptionsChange = (value: string) => {
     const optionsArray = value.split('\n').filter((opt) => opt.trim() !== '');
     setFormData({ ...formData, options: optionsArray });

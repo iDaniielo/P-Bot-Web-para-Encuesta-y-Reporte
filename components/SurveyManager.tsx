@@ -647,7 +647,7 @@ function SurveyForm({
                   }}
                   placeholder="Nombre del nuevo grupo"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
-                  onKeyPress={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       handleCreateGroup();
