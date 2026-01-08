@@ -2,6 +2,9 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { Database } from '@/types/database';
 
+// Re-export createServerClient for files that need direct access
+export { createServerClient, type CookieOptions };
+
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
