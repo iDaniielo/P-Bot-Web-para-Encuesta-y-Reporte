@@ -66,7 +66,7 @@ function validateQuestionData(data: Partial<Question>): { valid: boolean; error?
   }
   
   // Validar tipo de pregunta
-  const validTypes = ['text', 'phone', 'checkbox', 'radio', 'select'];
+  const validTypes = ['text', 'phone', 'checkbox', 'radio', 'select', 'rating', 'boolean', 'number'];
   if (!validTypes.includes(data.question_type)) {
     return { 
       valid: false, 
@@ -131,7 +131,7 @@ interface Question {
   id?: string;
   question_text: string;
   question_key: string;
-  question_type: 'text' | 'phone' | 'checkbox' | 'radio' | 'select';
+  question_type: 'text' | 'phone' | 'checkbox' | 'radio' | 'select' | 'rating' | 'boolean' | 'number';
   options?: string[];
   validation_rules?: Record<string, any>;
   order_index: number;

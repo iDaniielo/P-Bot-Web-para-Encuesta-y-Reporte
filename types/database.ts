@@ -127,7 +127,7 @@ export interface Database {
           id: string;
           question_text: string;
           question_key: string;
-          question_type: 'text' | 'phone' | 'checkbox' | 'radio' | 'select';
+          question_type: 'text' | 'phone' | 'checkbox' | 'radio' | 'select' | 'rating' | 'boolean' | 'number';
           options: Json | null;
           validation_rules: Json | null;
           order_index: number;
@@ -140,7 +140,7 @@ export interface Database {
           id?: string;
           question_text: string;
           question_key: string;
-          question_type: 'text' | 'phone' | 'checkbox' | 'radio' | 'select';
+          question_type: 'text' | 'phone' | 'checkbox' | 'radio' | 'select' | 'rating' | 'boolean' | 'number';
           options?: Json | null;
           validation_rules?: Json | null;
           order_index?: number;
@@ -153,7 +153,7 @@ export interface Database {
           id?: string;
           question_text?: string;
           question_key?: string;
-          question_type?: 'text' | 'phone' | 'checkbox' | 'radio' | 'select';
+          question_type?: 'text' | 'phone' | 'checkbox' | 'radio' | 'select' | 'rating' | 'boolean' | 'number';
           options?: Json | null;
           validation_rules?: Json | null;
           order_index?: number;
