@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'questions'>('dashboard');
+  const [surveys, setSurveys] = useState<any[]>([]);
   const itemsPerPage = 10;
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -61,12 +62,26 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchSurveys = async () => {
+    try {
+      const response = await fetch('/api/surveys?status=active');
+      const data = await response.json();
+      
+      if (response.ok && data.surveys) {
+        setSurveys(data.surveys);
+      }
+    } catch (error) {
+      console.error('Error fetching surveys:', error);
+    }
+  };
+
   useEffect(() => {
     if (!isAuthenticated && !loading) {
       // El middleware redirigirá automáticamente a /login si no hay token
       return;
     }
     fetchEncuestas();
+    fetchSurveys();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, loading]);
 
@@ -289,6 +304,42 @@ export default function DashboardPage() {
         {/* Content based on active tab */}
         {activeTab === 'dashboard' ? (
           <>
+            {/* Survey Selector for Dynamic Dashboards */}
+            {surveys.length > 0 && (
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl shadow-lg p-6 mb-8 border border-purple-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  📊 Dashboards Dinámicos por Encuesta
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Selecciona una encuesta para ver estadísticas detalladas con gráficos dinámicos
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {surveys.map((survey) => (
+                    <Link
+                      key={survey.id}
+                      href={`/dashboard/${survey.id}`}
+                      className="bg-white rounded-lg p-4 border border-gray-200 hover:border-purple-400 hover:shadow-md transition-all group"
+                    >
+                      <h4 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors mb-1">
+                        {survey.title}
+                      </h4>
+                      {survey.description && (
+                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                          {survey.description}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>/{survey.slug}</span>
+                        <span className="text-purple-600 group-hover:text-purple-700 font-medium">
+                          Ver dashboard →
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* KPI Cards Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Total Responses */}
