@@ -274,7 +274,7 @@ export default function QuestionManager() {
   };
 
   // Usar plantilla predefinida
-  const useTemplate = (template: Partial<Question>) => {
+  const applyTemplate = (template: Partial<Question>) => {
     setFormData({ ...template, is_active: true });
     setIsCreating(true);
     setValidationErrors({});
@@ -322,14 +322,14 @@ export default function QuestionManager() {
   return (
     <div className="space-y-6">
       {/* Survey Selector */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-5">
+        <label className="block text-base font-bold text-gray-900 mb-3">
           Selecciona una encuesta para gestionar sus preguntas:
         </label>
         <select
           value={selectedSurveyId}
           onChange={(e) => setSelectedSurveyId(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold text-gray-900 text-base"
           disabled={surveys.length === 0}
         >
           {surveys.length === 0 ? (
@@ -345,7 +345,7 @@ export default function QuestionManager() {
         {surveys.length === 0 && (
           <p className="mt-2 text-sm text-gray-600">
             Crea una encuesta primero en la{' '}
-            <a href="/dashboard/surveys" className="text-blue-600 hover:underline">
+            <a href="/dashboard/surveys" className="text-blue-600 hover:underline font-semibold">
               gestión de encuestas
             </a>
           </p>
@@ -410,7 +410,7 @@ export default function QuestionManager() {
               {questionTemplates.map((template, idx) => (
                 <button
                   key={idx}
-                  onClick={() => useTemplate(template)}
+                  onClick={() => applyTemplate(template)}
                   className="text-left px-3 py-2 bg-white border border-blue-200 rounded hover:bg-blue-100 hover:border-blue-300 transition-colors text-sm"
                 >
                   <div className="font-medium text-blue-900">{template.question_text}</div>

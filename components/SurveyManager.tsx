@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Archive, CheckCircle2, FileText, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Archive, CheckCircle2, FileText, Eye, PlusCircle } from 'lucide-react';
 import type { Survey, SurveyGroup } from '@/types/database';
 import Link from 'next/link';
 
@@ -352,6 +352,7 @@ export default function SurveyManager() {
               resetForm();
             }}
             generateSlug={generateSlug}
+            onGroupCreated={fetchGroups}
           />
         </div>
       )}
@@ -388,6 +389,7 @@ export default function SurveyManager() {
                     resetForm();
                   }}
                   generateSlug={generateSlug}
+                  onGroupCreated={fetchGroups}
                 />
               ) : (
                 <div className="flex items-start justify-between">
@@ -480,6 +482,7 @@ interface SurveyFormProps {
   onSave: () => void;
   onCancel: () => void;
   generateSlug: (title: string) => string;
+  onGroupCreated?: () => void;
 }
 
 function SurveyForm({
@@ -489,7 +492,56 @@ function SurveyForm({
   onSave,
   onCancel,
   generateSlug,
+  onGroupCreated,
 }: SurveyFormProps) {
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [groupError, setGroupError] = useState('');
+
+  const cancelGroupCreation = () => {
+    setIsCreatingGroup(false);
+    setNewGroupName('');
+    setGroupError('');
+  };
+
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim()) {
+      setGroupError('El nombre del grupo es obligatorio');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/survey-groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newGroupName.trim() }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al crear grupo');
+      }
+
+      const result = await response.json();
+      // Set the newly created group as selected
+      setFormData({ ...formData, survey_group_id: result.group.id });
+      cancelGroupCreation();
+      
+      // Notify parent to refresh groups
+      if (onGroupCreated) {
+        try {
+          await Promise.resolve(onGroupCreated());
+        } catch (refreshError) {
+          console.error('Error refreshing groups:', refreshError);
+          // Group was created successfully, but list refresh failed
+          // The new group is still selected, so this is not critical
+        }
+      }
+    } catch (err) {
+      setGroupError(err instanceof Error ? err.message : 'Error al crear grupo');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -568,20 +620,81 @@ function SurveyForm({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Grupo (opcional)
           </label>
-          <select
-            value={formData.survey_group_id || ''}
-            onChange={(e) =>
-              setFormData({ ...formData, survey_group_id: e.target.value || null })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
-          >
-            <option value="">Sin grupo</option>
-            {groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
-              </option>
-            ))}
-          </select>
+          {!isCreatingGroup ? (
+            <div className="flex gap-2">
+              <select
+                value={formData.survey_group_id || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, survey_group_id: e.target.value || null })
+                }
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
+              >
+                <option value="">Sin grupo</option>
+                {groups.map((group) => (
+                  <option key={group.id} value={group.id}>
+                    {group.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setIsCreatingGroup(true)}
+                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+                title="Crear nuevo grupo"
+              >
+                <PlusCircle className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newGroupName}
+                  onChange={(e) => {
+                    setNewGroupName(e.target.value);
+                    setGroupError('');
+                  }}
+                  placeholder="Nombre del nuevo grupo"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                  autoFocus
+                  aria-label="Nombre del nuevo grupo"
+                  aria-describedby={groupError ? 'group-error' : undefined}
+                  aria-invalid={!!groupError}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleCreateGroup();
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault();
+                      cancelGroupCreation();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleCreateGroup}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  title="Guardar grupo"
+                >
+                  <Save className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelGroupCreation}
+                  className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  title="Cancelar"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {groupError && (
+                <p id="group-error" className="text-red-500 text-xs" role="alert">
+                  {groupError}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
