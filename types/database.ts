@@ -38,6 +38,7 @@ export interface Database {
           id: string;
           title: string;
           description: string | null;
+          slug: string;
           survey_group_id: string | null;
           status: 'draft' | 'active' | 'archived';
           created_by: string | null;
@@ -48,6 +49,7 @@ export interface Database {
           id?: string;
           title: string;
           description?: string | null;
+          slug?: string;
           survey_group_id?: string | null;
           status?: 'draft' | 'active' | 'archived';
           created_by?: string | null;
@@ -58,6 +60,7 @@ export interface Database {
           id?: string;
           title?: string;
           description?: string | null;
+          slug?: string;
           survey_group_id?: string | null;
           status?: 'draft' | 'active' | 'archived';
           created_by?: string | null;
