@@ -4,30 +4,13 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 /**
- * Calculate statistics for a specific question
+ * Calculate statistics for a specific question using pre-fetched responses
  */
-async function calculateQuestionStatistics(
-  supabase: any,
-  surveyId: string,
+function calculateQuestionStatistics(
+  responses: any[],
   question: any
-): Promise<any> {
+): any {
   const { question_type, question_key } = question;
-  
-  // Get all responses for this survey
-  const { data: responses, error } = await supabase
-    .from('encuestas')
-    .select('respuestas, created_at')
-    .eq('survey_id', surveyId)
-    .not('respuestas', 'is', null);
-
-  if (error || !responses) {
-    return {
-      type: question_type,
-      total_responses: 0,
-      error: 'No se pudieron obtener las respuestas'
-    };
-  }
-
   const totalResponses = responses.length;
 
   switch (question_type) {
@@ -159,35 +142,40 @@ async function buildDashboardManually(supabase: any, surveyId: string) {
     console.error('Error fetching questions:', questionsError);
   }
 
-  // Get response count and dates
-  const { data: responses, error: responsesError } = await supabase
+  // Get all responses with their data (fetch once for all questions)
+  const { data: responsesWithData, error: responsesDataError } = await supabase
     .from('encuestas')
-    .select('created_at')
-    .eq('survey_id', surveyId);
+    .select('respuestas, created_at')
+    .eq('survey_id', surveyId)
+    .not('respuestas', 'is', null);
 
-  const totalResponses = responses?.length || 0;
-  const lastResponseAt = responses && responses.length > 0
+  if (responsesDataError) {
+    console.error('Error fetching responses:', responsesDataError);
+  }
+
+  const responses = responsesWithData || [];
+  const totalResponses = responses.length;
+  
+  const lastResponseAt = responses.length > 0
     ? responses.reduce((latest: any, r: any) => 
         new Date(r.created_at) > new Date(latest.created_at) ? r : latest
       ).created_at
     : null;
-  const firstResponseAt = responses && responses.length > 0
+  const firstResponseAt = responses.length > 0
     ? responses.reduce((earliest: any, r: any) => 
         new Date(r.created_at) < new Date(earliest.created_at) ? r : earliest
       ).created_at
     : null;
 
-  // Calculate statistics for each question
-  const questionsWithStats = questions ? await Promise.all(
-    questions.map(async (q: any) => ({
-      question_id: q.id,
-      question_text: q.question_text,
-      question_key: q.question_key,
-      question_type: q.question_type,
-      options: q.options,
-      statistics: await calculateQuestionStatistics(supabase, surveyId, q)
-    }))
-  ) : [];
+  // Calculate statistics for each question using the same responses data
+  const questionsWithStats = questions ? questions.map((q: any) => ({
+    question_id: q.id,
+    question_text: q.question_text,
+    question_key: q.question_key,
+    question_type: q.question_type,
+    options: q.options,
+    statistics: calculateQuestionStatistics(responses, q)
+  })) : [];
 
   return {
     survey_id: survey.id,
