@@ -191,10 +191,12 @@ export async function POST(request: NextRequest) {
     // Generate slug or use provided one
     let slug = providedSlug?.trim() || generateSlug(title);
     
-    // Ensure slug is unique
+    // Ensure slug is unique (with reasonable limit to prevent infinite loop)
     let finalSlug = slug;
     let counter = 1;
-    while (true) {
+    const maxAttempts = 100;
+    
+    while (counter < maxAttempts) {
       const { data: existingSurvey } = await supabase
         .from('surveys')
         .select('id')
@@ -205,6 +207,13 @@ export async function POST(request: NextRequest) {
       
       finalSlug = `${slug}-${counter}`;
       counter++;
+    }
+    
+    if (counter >= maxAttempts) {
+      return NextResponse.json(
+        { error: 'No se pudo generar un slug único. Por favor, proporciona un slug manualmente.' },
+        { status: 409 }
+      );
     }
 
     // Insert survey

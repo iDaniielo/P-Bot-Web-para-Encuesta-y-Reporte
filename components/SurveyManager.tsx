@@ -505,8 +505,10 @@ function SurveyForm({
               setFormData({ 
                 ...formData, 
                 title: newTitle,
-                // Auto-generate slug if not manually set
-                slug: formData.slug || generateSlug(newTitle)
+                // Auto-generate slug only if it's empty or hasn't been manually modified
+                slug: formData.slug && formData.slug !== generateSlug(formData.title || '') 
+                  ? formData.slug 
+                  : generateSlug(newTitle)
               });
             }}
             maxLength={200}
