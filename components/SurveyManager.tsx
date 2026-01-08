@@ -498,6 +498,12 @@ function SurveyForm({
   const [newGroupName, setNewGroupName] = useState('');
   const [groupError, setGroupError] = useState('');
 
+  const cancelGroupCreation = () => {
+    setIsCreatingGroup(false);
+    setNewGroupName('');
+    setGroupError('');
+  };
+
   const handleCreateGroup = async () => {
     if (!newGroupName.trim()) {
       setGroupError('El nombre del grupo es obligatorio');
@@ -517,15 +523,19 @@ function SurveyForm({
       }
 
       const result = await response.json();
-      // Set the newly created group as selected
-      setFormData({ ...formData, survey_group_id: result.group.id });
-      setIsCreatingGroup(false);
-      setNewGroupName('');
-      setGroupError('');
+      // Set the newly created group as selected using functional update
+      setFormData((prev) => ({ ...prev, survey_group_id: result.group.id }));
+      cancelGroupCreation();
       
       // Notify parent to refresh groups
       if (onGroupCreated) {
-        onGroupCreated();
+        try {
+          await onGroupCreated();
+        } catch (refreshError) {
+          console.error('Error refreshing groups:', refreshError);
+          // Group was created successfully, but list refresh failed
+          // The new group is still selected, so this is not critical
+        }
       }
     } catch (err) {
       setGroupError(err instanceof Error ? err.message : 'Error al crear grupo');
@@ -653,9 +663,7 @@ function SurveyForm({
                       handleCreateGroup();
                     } else if (e.key === 'Escape') {
                       e.preventDefault();
-                      setIsCreatingGroup(false);
-                      setNewGroupName('');
-                      setGroupError('');
+                      cancelGroupCreation();
                     }
                   }}
                 />
@@ -669,11 +677,7 @@ function SurveyForm({
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsCreatingGroup(false);
-                    setNewGroupName('');
-                    setGroupError('');
-                  }}
+                  onClick={cancelGroupCreation}
                   className="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
                   title="Cancelar"
                 >
