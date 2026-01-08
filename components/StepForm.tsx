@@ -250,7 +250,7 @@ export default function StepForm({ fields: providedFields, onSubmit, onSuccess }
             placeholder={currentField.placeholder}
             min={currentField.min}
             max={currentField.max}
-            className="w-full px-6 py-4 text-lg border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-white outline-none transition-all"
+            className="w-full px-6 py-4 text-lg text-black border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-white outline-none transition-all"
             autoFocus
           />
         )}

@@ -180,7 +180,7 @@ export default function SurveyBot({ onComplete, surveyId }: SurveyBotProps) {
               {...register(fieldName)}
               type="text"
               placeholder={currentQuestion.placeholder}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-black bg-white"
               autoFocus
             />
             {error && (
@@ -217,7 +217,7 @@ export default function SurveyBot({ onComplete, surveyId }: SurveyBotProps) {
                   target.value = newValue.substring(0, 10);
                 }
               }}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-black bg-white"
               autoFocus
             />
             {error && (
@@ -231,7 +231,7 @@ export default function SurveyBot({ onComplete, surveyId }: SurveyBotProps) {
           <div>
             <select
               {...register(fieldName)}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-black bg-white"
               autoFocus
             >
               <option value="">Selecciona una opción</option>
@@ -261,7 +261,7 @@ export default function SurveyBot({ onComplete, surveyId }: SurveyBotProps) {
                   value={option}
                   className="w-5 h-5 text-red-600 focus:ring-red-500"
                 />
-                <span className="ml-3 text-lg font-medium text-gray-900">{option}</span>
+                <span className="ml-3 text-lg font-medium text-black">{option}</span>
               </label>
             ))}
             {error && (
@@ -287,7 +287,7 @@ export default function SurveyBot({ onComplete, surveyId }: SurveyBotProps) {
                     value={option}
                     className="w-5 h-5 text-red-600 focus:ring-red-500 rounded"
                   />
-                  <span className="ml-3 text-lg font-medium text-gray-900">{option}</span>
+                  <span className="ml-3 text-lg font-medium text-black">{option}</span>
                 </label>
               ))}
             </div>
@@ -303,7 +303,7 @@ export default function SurveyBot({ onComplete, surveyId }: SurveyBotProps) {
                   {...register('regalo_otro' as any)}
                   type="text"
                   placeholder="Especifica qué otro regalo..."
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-gray-900 bg-white"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-lg text-black bg-white"
                 />
               </motion.div>
             )}
