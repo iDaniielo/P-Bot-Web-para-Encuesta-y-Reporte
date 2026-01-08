@@ -1,0 +1,10 @@
+# Archivos ignorados por Git
+.env.local
+.env*.local
+node_modules/
+.next/
+out/
+dist/
+
+# Archivos de Supabase CLI
+.supabase/
