@@ -145,6 +145,7 @@ export async function GET(request: Request) {
     
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get('active') !== 'false'; // Por defecto solo activas
+    const surveyId = searchParams.get('surveyId'); // Filtrar por encuesta específica
 
     let query = supabase
       .from('survey_questions')
@@ -154,6 +155,11 @@ export async function GET(request: Request) {
     // Por defecto, solo mostrar preguntas activas (para el formulario público)
     if (activeOnly) {
       query = query.eq('is_active', true);
+    }
+
+    // Filtrar por survey_id si se proporciona
+    if (surveyId) {
+      query = query.eq('survey_id', surveyId);
     }
 
     const { data, error } = await query;

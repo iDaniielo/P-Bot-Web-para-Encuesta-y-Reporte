@@ -9,6 +9,70 @@ export type Json =
 export interface Database {
   api: {
     Tables: {
+      survey_groups: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      surveys: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          survey_group_id: string | null;
+          status: 'draft' | 'active' | 'archived';
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          survey_group_id?: string | null;
+          status?: 'draft' | 'active' | 'archived';
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          survey_group_id?: string | null;
+          status?: 'draft' | 'active' | 'archived';
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'surveys_survey_group_id_fkey';
+            columns: ['survey_group_id'];
+            referencedRelation: 'survey_groups';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       encuestas: {
         Row: {
           id: string;
@@ -20,6 +84,7 @@ export interface Database {
           lugar_compra: string;
           gasto: string;
           respuestas?: Json;
+          survey_id?: string | null;
         };
         Insert: {
           id?: string;
@@ -31,6 +96,7 @@ export interface Database {
           lugar_compra?: string;
           gasto?: string;
           respuestas?: Json;
+          survey_id?: string | null;
         };
         Update: {
           id?: string;
@@ -42,8 +108,16 @@ export interface Database {
           lugar_compra?: string;
           gasto?: string;
           respuestas?: Json;
+          survey_id?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'encuestas_survey_id_fkey';
+            columns: ['survey_id'];
+            referencedRelation: 'surveys';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       survey_questions: {
         Row: {
@@ -57,6 +131,7 @@ export interface Database {
           is_active: boolean;
           created_at: string;
           updated_at: string;
+          survey_id: string | null;
         };
         Insert: {
           id?: string;
@@ -69,6 +144,7 @@ export interface Database {
           is_active?: boolean;
           created_at?: string;
           updated_at?: string;
+          survey_id?: string | null;
         };
         Update: {
           id?: string;
@@ -81,8 +157,16 @@ export interface Database {
           is_active?: boolean;
           created_at?: string;
           updated_at?: string;
+          survey_id?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'survey_questions_survey_id_fkey';
+            columns: ['survey_id'];
+            referencedRelation: 'surveys';
+            referencedColumns: ['id'];
+          }
+        ];
       };
     };
     Views: {
@@ -102,3 +186,5 @@ export interface Database {
 
 export type Encuesta = Database['api']['Tables']['encuestas']['Row'];
 export type SurveyQuestion = Database['api']['Tables']['survey_questions']['Row'];
+export type Survey = Database['api']['Tables']['surveys']['Row'];
+export type SurveyGroup = Database['api']['Tables']['survey_groups']['Row'];
