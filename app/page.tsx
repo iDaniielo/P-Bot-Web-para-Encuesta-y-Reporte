@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from "next/link";
 import { Gift, BarChart3, FileText, FolderOpen, Loader2 } from "lucide-react";
 import type { Survey, SurveyGroup } from '@/types/database';
@@ -35,15 +35,17 @@ export default function Home() {
     fetchSurveys();
   }, []);
 
-  // Group surveys by group
-  const groupedSurveys: GroupedSurveys = surveys.reduce((acc, survey) => {
-    const groupName = survey.survey_groups?.name || 'Sin grupo';
-    if (!acc[groupName]) {
-      acc[groupName] = [];
-    }
-    acc[groupName].push(survey);
-    return acc;
-  }, {} as GroupedSurveys);
+  // Group surveys by group (memoized for performance)
+  const groupedSurveys: GroupedSurveys = useMemo(() => {
+    return surveys.reduce((acc, survey) => {
+      const groupName = survey.survey_groups?.name || 'Sin grupo';
+      if (!acc[groupName]) {
+        acc[groupName] = [];
+      }
+      acc[groupName].push(survey);
+      return acc;
+    }, {} as GroupedSurveys);
+  }, [surveys]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-red-50 via-white to-green-50 p-4 py-8">

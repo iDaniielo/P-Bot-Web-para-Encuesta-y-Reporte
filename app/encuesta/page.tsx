@@ -8,10 +8,11 @@ import type { SurveyFormData } from '@/lib/survey-config';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import type { Survey } from '@/types/database';
+import { DEFAULT_SURVEY_ID } from '@/lib/constants';
 
 export default function EncuestaPage() {
   const searchParams = useSearchParams();
-  const surveyId = searchParams.get('surveyId') || '00000000-0000-0000-0000-000000000001'; // Default survey
+  const surveyId = searchParams.get('surveyId') || DEFAULT_SURVEY_ID;
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export default function EncuestaPage() {
           } else {
             // If not found, try to load default survey
             setSurvey({
-              id: '00000000-0000-0000-0000-000000000001',
+              id: DEFAULT_SURVEY_ID,
               title: 'Encuesta Navideña 2024',
               description: 'Encuesta sobre planes y compras navideñas',
               status: 'active',

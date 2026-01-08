@@ -136,6 +136,7 @@ interface Question {
   validation_rules?: Record<string, any>;
   order_index: number;
   is_active: boolean;
+  survey_id?: string | null;
 }
 
 // GET - Obtener todas las preguntas
