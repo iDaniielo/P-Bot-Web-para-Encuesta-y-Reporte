@@ -84,6 +84,54 @@ export interface Database {
         };
         Relationships: [];
       };
+      support_requests: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          phone: string | null;
+          message: string;
+          status: 'pending' | 'in_progress' | 'resolved';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          phone?: string | null;
+          message: string;
+          status?: 'pending' | 'in_progress' | 'resolved';
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          email?: string;
+          phone?: string | null;
+          message?: string;
+          status?: 'pending' | 'in_progress' | 'resolved';
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      support_request_rate_limit: {
+        Row: {
+          user_id: string;
+          request_count: number;
+          window_start: string;
+        };
+        Insert: {
+          user_id: string;
+          request_count?: number;
+          window_start?: string;
+        };
+        Update: {
+          user_id?: string;
+          request_count?: number;
+          window_start?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -102,3 +150,4 @@ export interface Database {
 
 export type Encuesta = Database['api']['Tables']['encuestas']['Row'];
 export type SurveyQuestion = Database['api']['Tables']['survey_questions']['Row'];
+export type SupportRequest = Database['api']['Tables']['support_requests']['Row'];

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { MessageCircle, X, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import { MessageCircle, X, ChevronDown, ChevronUp, HelpCircle, Send, Loader2 } from 'lucide-react';
 
 interface FAQ {
   id: string;
@@ -89,11 +89,119 @@ export default function FAQChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
+  
+  const [formErrors, setFormErrors] = useState({
+    name: '',
+    email: '',
+    message: '',
+  });
 
   const toggleChat = () => setIsOpen(!isOpen);
 
   const toggleQuestion = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
+  };
+  
+  const validateForm = (): boolean => {
+    const errors = {
+      name: '',
+      email: '',
+      message: '',
+    };
+    
+    let isValid = true;
+    
+    if (!formData.name.trim()) {
+      errors.name = 'El nombre es requerido';
+      isValid = false;
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'El email es requerido';
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Email inválido';
+      isValid = false;
+    }
+    
+    if (!formData.message.trim()) {
+      errors.message = 'El mensaje es requerido';
+      isValid = false;
+    }
+    
+    setFormErrors(errors);
+    return isValid;
+  };
+  
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+    
+    try {
+      const response = await fetch('/api/contact-support', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al enviar la solicitud');
+      }
+      
+      // Success
+      setSubmitSuccess(true);
+      setFormData({ name: '', email: '', phone: '', message: '' });
+      setFormErrors({ name: '', email: '', message: '' });
+      
+      // Close form after 2 seconds
+      setTimeout(() => {
+        setShowContactForm(false);
+        setSubmitSuccess(false);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      setSubmitError(
+        error instanceof Error 
+          ? error.message 
+          : 'Error de red. Por favor, verifica tu conexión e intenta nuevamente.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error for this field
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const filteredFAQs = selectedCategory === 'all' 
@@ -195,51 +303,184 @@ export default function FAQChat() {
 
           {/* FAQ List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {filteredFAQs.length > 0 ? (
-              filteredFAQs.map((faq, index) => (
-                <div
-                  key={faq.id}
-                  className="border border-gray-200 rounded-lg overflow-hidden hover:border-blue-300 transition-colors"
-                >
-                  <button
-                    onClick={() => toggleQuestion(index)}
-                    className="w-full text-left p-3 hover:bg-gray-50 transition-colors flex items-center justify-between gap-2"
-                  >
-                    <span className="font-medium text-gray-900 text-sm flex-1">
-                      {faq.question}
-                    </span>
-                    {expandedIndex === index ? (
-                      <ChevronUp className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    )}
-                  </button>
-                  {expandedIndex === index && (
-                    <div className="p-3 pt-0 text-sm text-gray-600 whitespace-pre-line border-t border-gray-100 bg-blue-50">
-                      {faq.answer}
+            {!showContactForm ? (
+              <>
+                {filteredFAQs.length > 0 ? (
+                  filteredFAQs.map((faq, index) => (
+                    <div
+                      key={faq.id}
+                      className="border border-gray-200 rounded-lg overflow-hidden hover:border-blue-300 transition-colors"
+                    >
+                      <button
+                        onClick={() => toggleQuestion(index)}
+                        className="w-full text-left p-3 hover:bg-gray-50 transition-colors flex items-center justify-between gap-2"
+                      >
+                        <span className="font-medium text-gray-900 text-sm flex-1">
+                          {faq.question}
+                        </span>
+                        {expandedIndex === index ? (
+                          <ChevronUp className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                        )}
+                      </button>
+                      {expandedIndex === index && (
+                        <div className="p-3 pt-0 text-sm text-gray-600 whitespace-pre-line border-t border-gray-100 bg-blue-50">
+                          {faq.answer}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <HelpCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm">No hay preguntas en esta categoría</p>
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <HelpCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm">No hay preguntas en esta categoría</p>
-              </div>
+              <>
+                {/* Contact Form */}
+                <div className="mb-4">
+                  <button
+                    onClick={() => {
+                      setShowContactForm(false);
+                      setSubmitError(null);
+                      setSubmitSuccess(false);
+                    }}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                  >
+                    ← Volver a FAQ
+                  </button>
+                </div>
+                
+                {submitSuccess ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                    <div className="text-green-600 text-4xl mb-2">✓</div>
+                    <p className="text-green-800 font-medium">¡Solicitud enviada!</p>
+                    <p className="text-green-600 text-sm mt-1">Nos pondremos en contacto pronto.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          formErrors.name ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        disabled={isSubmitting}
+                      />
+                      {formErrors.name && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          formErrors.email ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        disabled={isSubmitting}
+                      />
+                      {formErrors.email && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                        Teléfono (opcional)
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                        Mensaje <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        rows={4}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+                          formErrors.message ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        disabled={isSubmitting}
+                      />
+                      {formErrors.message && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.message}</p>
+                      )}
+                    </div>
+                    
+                    {submitError && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p className="text-red-800 text-sm">{submitError}</p>
+                      </div>
+                    )}
+                    
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          Enviar Solicitud
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+              </>
             )}
           </div>
 
           {/* Footer */}
           <div className="p-3 border-t border-gray-200 bg-gray-50">
-            <p className="text-xs text-center text-gray-600">
-              ¿No encuentras lo que buscas?{' '}
-              <a
-                href="mailto:support@example.com"
-                className="text-blue-600 hover:text-blue-700 font-medium"
+            {!showContactForm ? (
+              <button
+                onClick={() => setShowContactForm(true)}
+                className="w-full text-sm text-center text-blue-600 hover:text-blue-700 font-medium flex items-center justify-center gap-2 py-2 hover:bg-blue-50 rounded-lg transition-colors"
               >
-                Contáctanos
-              </a>
-            </p>
+                <Send className="w-4 h-4" />
+                ¿No encuentras lo que buscas? Contáctanos
+              </button>
+            ) : (
+              <p className="text-xs text-center text-gray-600">
+                Completa el formulario y te responderemos pronto
+              </p>
+            )}
           </div>
         </div>
       )}
