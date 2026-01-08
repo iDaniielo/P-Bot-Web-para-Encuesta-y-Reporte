@@ -151,12 +151,20 @@ export async function POST(request: Request) {
     const { name, email, phone, message } = validationResult.data;
     
     // Sanitize inputs
-    const sanitizedData = {
+    const sanitizedData: {
+      name: string;
+      email: string;
+      phone?: string;
+      message: string;
+    } = {
       name: sanitizeInput(name),
       email: sanitizeInput(email),
-      phone: phone ? sanitizeInput(phone) : null,
       message: sanitizeInput(message),
     };
+    
+    if (phone) {
+      sanitizedData.phone = sanitizeInput(phone);
+    }
     
     // Check rate limiting
     const userId = session.user.id;
