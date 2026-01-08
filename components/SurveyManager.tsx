@@ -523,8 +523,8 @@ function SurveyForm({
       }
 
       const result = await response.json();
-      // Set the newly created group as selected using functional update
-      setFormData((prev) => ({ ...prev, survey_group_id: result.group.id }));
+      // Set the newly created group as selected
+      setFormData({ ...formData, survey_group_id: result.group.id });
       cancelGroupCreation();
       
       // Notify parent to refresh groups
@@ -625,7 +625,7 @@ function SurveyForm({
               <select
                 value={formData.survey_group_id || ''}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, survey_group_id: e.target.value || null }))
+                  setFormData({ ...formData, survey_group_id: e.target.value || null })
                 }
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
               >
