@@ -11,10 +11,16 @@ const contactSupportSchema = z.object({
 });
 
 // Sanitize input to prevent injection attacks
+// This is a basic sanitization that escapes HTML entities
+// For production, consider using a library like DOMPurify
 function sanitizeInput(input: string): string {
   return input
-    .replace(/[<>]/g, '') // Remove < and >
-    .replace(/['"]/g, '') // Remove quotes
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
     .trim();
 }
 
@@ -65,16 +71,14 @@ async function checkRateLimit(supabase: any, userId: string): Promise<boolean> {
 
 // Send email notification to admin
 async function sendEmailNotification(
-  supabase: any,
   data: { name: string; email: string; phone?: string; message: string }
 ) {
   try {
-    // Get the admin user email (assuming the authenticated user is the CEO/admin)
-    const { data: { user } } = await supabase.auth.getUser();
-    const adminEmail = user?.email || process.env.ADMIN_EMAIL;
+    // Get the admin email from environment variable
+    const adminEmail = process.env.ADMIN_EMAIL;
     
     if (!adminEmail) {
-      console.error('No admin email configured');
+      console.error('No admin email configured. Please set ADMIN_EMAIL environment variable.');
       return;
     }
     
@@ -193,7 +197,7 @@ export async function POST(request: Request) {
     }
     
     // Send email notification (async, don't block response)
-    sendEmailNotification(supabase, sanitizedData).catch(err => 
+    sendEmailNotification(sanitizedData).catch(err => 
       console.error('Email notification failed:', err)
     );
     
